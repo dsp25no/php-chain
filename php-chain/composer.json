@@ -1,0 +1,15 @@
+{
+  "autoload": {
+    "psr-4": {
+      "PhpChain\\" : "lib/"
+    }
+  },
+  "require": {
+    "nikic/php-parser": "^4.0",
+    "ircmaxell/php-cfg": "v1.0.x-dev",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "psy/psysh": "@stable"
+  }
+}

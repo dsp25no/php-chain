@@ -1,0 +1,19 @@
+FROM composer:1.6
+LABEL authors="Diana Kovalenko <dkhunter10@gmail.com>,\
+ Dmitry Pavlov <dsp25no@gmail.com>"
+
+RUN apk add autoconf g++ make && \
+    pecl install xdebug && \
+    docker-php-ext-enable xdebug
+
+RUN echo "xdebug.max_nesting_level=-1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+WORKDIR /php-chain
+COPY composer.json .
+RUN composer install
+
+COPY test-project /target
+
+COPY lib lib
+COPY analyze.php .
+COPY config.php .
