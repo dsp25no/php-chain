@@ -28,26 +28,21 @@ class TargetVar {
             if ($type == "Literal") {
                 $this->value = $this->var->value;
             }
-            $this->metric *= TargetVar::getNumber("CONST");
         } elseif ($type === "Variable") {
             $this->category = "VAR";
-            $this->metric *= TargetVar::getNumber("VAR");
         } elseif ($type === "Temporary") {
             $op = $this->var->ops[0];
             $target_op = $this->dfg->getTargetOp($op);
             $this->category = $target_op->getCategory();
-            $this->metric = TargetVar::getNumber($this->category);
         } elseif ($type === "BoundVariable") {
             $this->category = "PROPERTY";
-            $this->metric *= TargetVar::getNumber("PROPERTY");
         }
     }
 
     public function getMetric()
     {
-        if ($this->category == null) {
-            $this->classify();
-        }
+        $category = $this->getCategory();
+        $this->metric = TargetVar::getNumber($category);
         return $this->metric;
     }
 
