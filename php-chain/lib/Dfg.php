@@ -88,6 +88,14 @@ class Dfg {
         return [$reachable, $metric];
     }
 
+    public function updateMetric()
+    {
+        list($block, $op) = $this->findBlockAndOp();
+        $reachable = $this->checkReachability($block);
+        $metric = $this->countMetric();
+        return [$reachable, $metric];
+    }
+
     public function getImportantParamNums()
     {
         $params = $this->script->functions[0]->params;

@@ -84,7 +84,7 @@ class TreeAnalyzer
             if(!$chain_call instanceof \StdClass) {
                 $dfg = $chain_node->getDfg();
                 $dfg->matchOutputInput($params);
-                $metric = $dfg->analyze();
+                $metric = $dfg->updateMetric();
                 $chain_node->setMetric($metric);
             } else {
                 $chain_node->setMetric($best_child->getMetric());
