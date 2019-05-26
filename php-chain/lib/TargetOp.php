@@ -89,7 +89,7 @@ class TargetOp
     }
 
     public static function countExpr(TargetVar $expr, $dfg) {
-        $var_type = $expr->getType();
+        $var_type = $expr->var->getType();
         if ($var_type == "Literal") {
             return $expr->var->value;
         }
