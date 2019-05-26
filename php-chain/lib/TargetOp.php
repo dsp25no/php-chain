@@ -48,14 +48,21 @@ class TargetOp
 
     public function composePhiOp()
     {
+        $this->category = "TMP";
         foreach ($this->op->vars as $var) {
             $target_var = $this->dfg->getTargetVar($var);
             $category = $target_var->getCategory();
+            if($category == "TMP") {
+                continue;
+            }
             $metric = TargetVar::getNumber($category);
             if($metric > $this->metric) {
                 $this->metric = $metric;
                 $this->category = $category;
             }
+        }
+        if($this->category === "TMP") {
+            $this->metric = TargetVar::getNumber($this->category);
         }
     }
 

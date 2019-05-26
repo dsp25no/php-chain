@@ -60,6 +60,9 @@ class TargetVar {
 
     public function updateCategory($category)
     {
+        if($this->processing)
+            return;
+        $this->processing = true;
         $this->category = $category;
         $this->metric = TargetVar::getNumber($this->category);
         foreach ($this->var->usages as $op) {
@@ -68,6 +71,7 @@ class TargetVar {
                 $target_op->updateCategory();
             }
         }
+        $this->processing = false;
     }
 
     public static function getNumber($category)
