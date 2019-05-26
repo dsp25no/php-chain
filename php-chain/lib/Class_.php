@@ -64,6 +64,9 @@ class Class_ extends ClassLike
                 return $this->_inherited_methods;
             }
             $methods = $extends->getMethods();
+            if(!$methods) {
+                return $this->_inherited_methods;
+            }
             $abstract_parent = $extends->node->isAbstract();
             foreach ($methods as $name => $method) {
                 if ($abstract_parent or !$method->isPrivate()) {
