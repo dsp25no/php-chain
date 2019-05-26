@@ -88,14 +88,6 @@ class Dfg {
         return [$reachable, $metric];
     }
 
-    public function analyzeVar($param_number)
-    {
-        list($block, $op) = $this->findBlockAndOp();
-        $param = $op->args[$param_number];
-        $var = $this->getTargetVar($param);
-        return $var->getMetric();
-    }
-
     public function getImportantParamNums()
     {
         $params = $this->script->functions[0]->params;
