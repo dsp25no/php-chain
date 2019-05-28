@@ -55,6 +55,10 @@ class Dfg {
     private function buildScope($start_op)
     {
         $important_params = $this->call->getTargetArgs();
+        if(!$start_op->args) {
+            // function don't have arguments
+            return;
+        }
         for ($i = 0; $i < sizeof($start_op->args); $i++) {
             if (in_array($i, $important_params)) {
                 $this->output_params[$i] = $this->getTargetVar($start_op->args[$i]);
