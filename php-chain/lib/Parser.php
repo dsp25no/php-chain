@@ -50,7 +50,11 @@ class Parser
     public function parse()
     {
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->target));
-        $files = new \RegexIterator($files, '/\.(php|inc)$/');
+        $files = new \RegexIterator(
+            $files,
+            // ignore directories with tests
+            '/^(?!.*(?=[\/\\\\][Tt]ests?[\/\\\\])).*\.(php|inc)$/'
+        );
         foreach ($files as $file) {
             $filename = $file->getPathName();
 
