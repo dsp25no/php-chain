@@ -94,7 +94,9 @@ class TreeAnalyzer
 
     public function analyze()
     {
+        echo "IntraProcedural Analyze".PHP_EOL;
         $this->intraProceduralAnalyze();
+        echo "InterProcedural Analyze".PHP_EOL;
         $this->interProceduralAnalyze();
     }
 }
