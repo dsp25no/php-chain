@@ -98,6 +98,8 @@ class ProjectKnowledge {
         $iterator->append(new \RegexIterator(new \ArrayIterator($searchSet), $regex));
         if(!$classFixed && !$strict) {
             $iterator->append(new \ArrayIterator($this->__call_methods));
+        } elseif(!$strict) {
+            $iterator->append(new \ArrayIterator(["__call" => $searchSet["__call"]]));
         }
         return $iterator;
     }
