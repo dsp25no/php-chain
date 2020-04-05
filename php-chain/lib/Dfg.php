@@ -76,28 +76,19 @@ class Dfg {
         return $metric;
     }
 
-    public function checkReachability($block)
-    {
-        return 1.0;
-        $checker = new TargetParent($block, $this);
-        return $checker->isReachable();
-    }
-
     public function analyze()
     {
         list($block, $op) = $this->findBlockAndOp();
         $this->buildScope($op);
-        $reachable = $this->checkReachability($block);
         $metric = $this->countMetric();
-        return [$reachable, $metric];
+        return $metric;
     }
 
     public function updateMetric()
     {
         list($block, $op) = $this->findBlockAndOp();
-        $reachable = $this->checkReachability($block);
         $metric = $this->countMetric();
-        return [$reachable, $metric];
+        return $metric;
     }
 
     public function getImportantParamNums()

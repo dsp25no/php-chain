@@ -68,13 +68,11 @@ class TreeAnalyzer
             }
 
             $best_child = null;
-            $best_metric = [-1, -1];
+            $best_metric = -1;
             foreach ($children as $call) {
                 $child = $children[$call];
                 $metric = $child->getMetric();
-                if ($metric[0] > $best_metric[0] or
-                    $metric[0] === $best_metric[0] and
-                    $metric[1] > $best_metric[1]) {
+                if ($metric > $best_metric) {
                     $best_metric = $metric;
                     $best_child = $child;
                 }
