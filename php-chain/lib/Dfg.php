@@ -33,6 +33,14 @@ class Dfg {
         }
     }
 
+    /**
+     * @return \SplObjectStorage
+     */
+    public function getTargetVars()
+    {
+        return $this->targetVars;
+    }
+
     public function getTargetOp($op, $strict=False)
     {
         if(!isset($this->targetOps[$op]) and !$strict) {
@@ -43,6 +51,16 @@ class Dfg {
         }
     }
 
+    public function getScript()
+    {
+        return $this->script;
+    }
+
+    public function getCall()
+    {
+        return $this->call;
+    }
+
     private function findBlockAndOp()
     {
         $traverser = new PHPCfg\Traverser;
@@ -50,6 +68,29 @@ class Dfg {
         $traverser->addVisitor($finder);
         $traverser->traverse($this->script);
         return [$finder->block, $finder->op];
+    }
+
+    private function buildSlice()
+    {
+        $traverser = new ReverseTraverser;
+        $slicer = new BackwardSlice($this);
+        $traverser->addVisitor($slicer);
+
+        $debug = false;
+        if ($debug) {
+            $file = fopen('slicer-debug.md', 'a');
+            $printer = new PHPCfg\Printer\Text();
+            fwrite($file, PHP_EOL."#START slicer" . PHP_EOL);
+            fwrite($file, $printer->printScript($this->script));
+            fwrite($file, "------------------------------------------------------" . PHP_EOL);
+        }
+
+        $traverser->traverse($this->script);
+
+        if ($debug) {
+            fwrite($file, $printer->printScript($this->script));
+            fclose($file);
+        }
     }
 
     private function buildScope($start_op)
@@ -78,15 +119,13 @@ class Dfg {
 
     public function analyze()
     {
-        list($block, $op) = $this->findBlockAndOp();
-        $this->buildScope($op);
+        $this->buildSlice();
         $metric = $this->countMetric();
         return $metric;
     }
 
     public function updateMetric()
     {
-        list($block, $op) = $this->findBlockAndOp();
         $metric = $this->countMetric();
         return $metric;
     }
@@ -107,6 +146,11 @@ class Dfg {
     public function getOutputParams()
     {
         return $this->output_params;
+    }
+
+    public function setOutputParam(TargetVar $param, $num)
+    {
+        $this->output_params[$num] = $param;
     }
 
     public function matchOutputInput($prev_output)

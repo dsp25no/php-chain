@@ -1,0 +1,151 @@
+<?php
+
+
+namespace PhpChain;
+
+use PHPCfg\Block;
+use PHPCfg\Func;
+use PHPCfg\Script;
+use PHPCfg\Traverser;
+use PHPCfg\Visitor;
+
+class ReverseTraverser extends Traverser
+{
+    /** @var \SplObjectStorage */
+    private $seen;
+    private $visitors = [];
+
+    public function addVisitor(Visitor $visitor)
+    {
+        $this->visitors[] = $visitor;
+    }
+
+    public function traverse(Script $script)
+    {
+        $this->event('enterScript', [$script]);
+        $this->startTraverseFunc($script->main);
+        foreach ($script->functions as $func) {
+            $this->startTraverseFunc($func);
+        }
+        foreach (array_reverse($script->functions) as $func) {
+            $this->endTraverseFunc($func);
+        }
+        $this->endTraverseFunc($script->main);
+        $this->event('leaveScript', [$script]);
+    }
+
+    public function startTraverseFunc(Func $func)
+    {
+        $this->seen = new \SplObjectStorage();
+        $this->event('enterFunc', [$func]);
+        $block = $func->cfg;
+        if (null !== $block) {
+            $this->startTraverseBlock($block, null);
+            $result = $this->endTraverseBlock($block, null);
+            if ($result === Visitor::REMOVE_BLOCK) {
+                throw new \RuntimeException('Cannot remove function start block');
+            }
+            if (null !== $result) {
+                $block = $result;
+            }
+            $func->cfg = $block;
+        }
+    }
+
+    public function endTraverseFunc(Func $func)
+    {
+        $this->event('leaveFunc', [$func]);
+        $this->seen = null;
+    }
+
+    private function startTraverseBlock(Block $block, Block $prior = null)
+    {
+        if ($this->seen->contains($block)) {
+            $this->event('skipBlock', [$block, $prior]);
+            // Always return null on a skip event
+            return;
+        }
+        $this->seen->attach($block);
+        $this->event('enterBlock', [$block, $prior]);
+        $children = $block->children;
+        for ($i = 0; $i < count($children); ++$i) {
+            $op = $children[$i];
+            $this->event('enterOp', [$op, $block]);
+            foreach ($op->getSubBlocks() as $subblock) {
+                $sub = $op->{$subblock};
+                if (! $sub) {
+                    continue;
+                }
+                if (! is_array($sub)) {
+                    $sub = [$sub];
+                }
+                for ($j = 0; $j < count($sub); ++$j) {
+                    $this->startTraverseBlock($sub[$j], $block);
+                }
+                for ($j = count($sub) -1 ; $j >= 0; --$j) {
+                    $result = $this->endTraverseBlock($sub[$j], $block);
+                    if ($result === Visitor::REMOVE_BLOCK) {
+                        array_splice($sub, $j, 1, []);
+                        // Revisit the ith block
+                        if ($j < count($sub)) {
+                            ++$j;
+                        }
+                    } elseif ($result instanceof Block) {
+                        $sub[$j] = $result;
+                        // Revisit the ith block again
+                        if ($j < count($sub)) {
+                            ++$j;
+                        }
+                    } elseif (null !== $result) {
+                        throw new \RuntimeException('Unknown return from visitor: '.gettype($result));
+                    }
+                }
+                if (is_array($op->{$subblock})) {
+                    $op->{$subblock} = $sub;
+                } else {
+                    $op->{$subblock} = array_shift($sub);
+                }
+            }
+        }
+        $block->children = $children;
+    }
+
+    private function endTraverseBlock(?Block $block, Block $prior = null)
+    {
+        if ($block) {
+            $children = $block->children;
+            for ($i = count($children)-1; $i >= 0; --$i) {
+                $op = $children[$i];
+                $result = $this->event('leaveOp', [$op, $block]);
+                if ($result === Visitor::REMOVE_OP) {
+                    array_splice($children, $i, 1, []);
+                    // Revisit the ith node
+                    if ($i < count($children)) {
+                        ++$i;
+                    }
+                } elseif ($result instanceof Op) {
+                    $children[$i] = $result;
+                    // Revisit the ith node again
+                    if ($i < count($children)) {
+                        ++$i;
+                    }
+                } elseif (null !== $result && $result !== $op) {
+                    throw new \RuntimeException('Unknown return from visitor: ' . gettype($result));
+                }
+            }
+            $block->children = $children;
+        }
+
+        return $this->event('leaveBlock', [$block, $prior]);
+    }
+
+    private function event($name, array $args)
+    {
+        foreach ($this->visitors as $visitor) {
+            $return = call_user_func_array([$visitor, $name], $args);
+            if (null !== $return) {
+                return $return;
+            }
+        }
+    }
+}

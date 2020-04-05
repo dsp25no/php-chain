@@ -11,6 +11,7 @@ class TargetVar {
     private $metric;
     private $dfg;
     private $processing;
+    private $out = false;
 
     public function __construct($operand, $dfg)
     {
@@ -87,5 +88,15 @@ class TargetVar {
         } elseif ($category == "TMP") {
             return 1;
         }
+    }
+
+    public function setOut()
+    {
+        $this->out = true;
+    }
+
+    public function getOut()
+    {
+        return $this->out;
     }
 }
