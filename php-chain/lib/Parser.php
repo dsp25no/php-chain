@@ -15,14 +15,14 @@ class Parser
     private $visitors = [];
     private $knowledge;
 
-    public function __construct($target, $knowledge, $config)
+    public function __construct($target, $config)
     {
         $this->target = $target;
-        $this->knowledge = $knowledge;
+        $this->knowledge = new ProjectKnowledge();
         $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
         $this->traverser = new NodeTraverser;
         $this->visitors[] = new NameResolver;
-        $this->visitors[] = new Collector($knowledge);
+        $this->visitors[] = new Collector($this->knowledge);
         if($config["features"]["foreach"]) {
             $this->visitors[] = new LoopResolver();
         }
@@ -70,5 +70,6 @@ class Parser
             }
         }
         $this->collectMethods();
+        return $this->knowledge;
     }
 }

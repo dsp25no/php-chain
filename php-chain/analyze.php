@@ -11,9 +11,8 @@ require_once "vendor/autoload.php";
 use PhpChain\{ProjectKnowledge, Parser, ChainBuilder, TreeAnalyzer};
 
 $config = require "config.php";
-$knowledge = new ProjectKnowledge();
-$parser = new Parser("/target", $knowledge, $config);
-$parser->parse();
+$parser = new Parser("/target", $config);
+$knowledge = $parser->parse();
 
 echo "Parsed".PHP_EOL;
 
