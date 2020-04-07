@@ -61,50 +61,12 @@ class Dfg {
         return $this->call;
     }
 
-    private function findBlockAndOp()
-    {
-        $traverser = new PHPCfg\Traverser;
-        $finder = new FindBlockAndOP($this->call);
-        $traverser->addVisitor($finder);
-        $traverser->traverse($this->script);
-        return [$finder->block, $finder->op];
-    }
-
     private function buildSlice()
     {
-        $traverser = new ReverseTraverser;
+        $traverser = new BackwardSliceWalker();
         $slicer = new BackwardSlice($this);
         $traverser->addVisitor($slicer);
-
-        $debug = false;
-        if ($debug) {
-            $file = fopen('slicer-debug.md', 'a');
-            $printer = new PHPCfg\Printer\Text();
-            fwrite($file, PHP_EOL."#START slicer" . PHP_EOL);
-            fwrite($file, $printer->printScript($this->script));
-            fwrite($file, "------------------------------------------------------" . PHP_EOL);
-        }
-
         $traverser->traverse($this->script);
-
-        if ($debug) {
-            fwrite($file, $printer->printScript($this->script));
-            fclose($file);
-        }
-    }
-
-    private function buildScope($start_op)
-    {
-        $important_params = $this->call->getTargetArgs();
-        if(!$start_op->args) {
-            // function don't have arguments
-            return;
-        }
-        for ($i = 0; $i < sizeof($start_op->args); $i++) {
-            if (in_array($i, $important_params)) {
-                $this->output_params[$i] = $this->getTargetVar($start_op->args[$i]);
-            }
-        }
     }
 
     public function countMetric()
