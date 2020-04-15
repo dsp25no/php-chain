@@ -3,7 +3,6 @@
 
 namespace PhpChain;
 
-
 use PHPCfg;
 use PHPCfg\{Block, Op};
 
@@ -40,7 +39,7 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
         $call = $this->dfg->getCall();
         if($op->getLine() === $call->node->getLine() and
             ($op->getType() === "Expr_FuncCall" or $op->getType() === "Expr_MethodCall") and
-            $op->name->value == $call->name) {
+            isset($op->name->value) and $op->name->value == $call->name) {
 
             $this->op = $op;
             $this->block = $block;
@@ -109,8 +108,10 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
         }
         // add if-else condition or other parent last stmt
         foreach ($block->parents as $parent) {
-            $cond = $parent->children[count($parent->children) - 1];
-            $this->dfg->getTargetOp($cond);
+            if ($parent->children) {
+                $cond = $parent->children[count($parent->children) - 1];
+                $this->dfg->getTargetOp($cond);
+            }
         }
         // add phi to scope
         foreach ($block->phi as $phi) {
