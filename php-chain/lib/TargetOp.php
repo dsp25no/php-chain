@@ -181,7 +181,8 @@ class TargetOp
                     break;
                 case 'var':
                     if ($type == 'Iterator_Value' or $type == 'Expr_ArrayDimFetch'
-                        or $type == 'Expr_PropertyFetch' or $type == 'Expr_ConstFetch') {
+                        or $type == 'Expr_PropertyFetch' or $type == 'Expr_ConstFetch'
+                        or $type == 'Expr_MethodCall' ) {
                         $arguments [] = $arg;
                     }
                     break;
