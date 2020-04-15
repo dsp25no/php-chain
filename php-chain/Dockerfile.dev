@@ -1,4 +1,4 @@
-FROM composer:1.6
+FROM composer:1.8
 LABEL authors="Diana Kovalenko <dkhunter10@gmail.com>,\
  Dmitry Pavlov <dsp25no@gmail.com>"
 
