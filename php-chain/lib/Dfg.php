@@ -69,6 +69,14 @@ class Dfg {
         $traverser->traverse($this->script);
     }
 
+    private function resolveConstants()
+    {
+        $traverser = new PHPCfg\Traverser();
+        $resolver = new ConstantPropagation($this);
+        $traverser->addVisitor($resolver);
+        $traverser->traverse($this->script);
+    }
+
     public function countMetric()
     {
         $metric = 1.0;
@@ -82,6 +90,7 @@ class Dfg {
     public function analyze()
     {
         $this->buildSlice();
+        $this->resolveConstants();
         $metric = $this->countMetric();
         return $metric;
     }
