@@ -8,16 +8,30 @@
 
 namespace PhpChain\ExprCall;
 
+use PhpChain\ClassMethod;
 use PhpParser\Node\Expr\MethodCall as ParserMethodCall;
 use PhpParser\Node\Expr\New_ as ParserNew;
 use PhpParser\Node;
 use PhpChain\ExprCall;
 
+/**
+ * Class MethodCall
+ * @package PhpChain\ExprCall
+ */
 class MethodCall extends ExprCall
 {
-    public $owner;
+    /**
+     * @var string
+     */
+    public string $owner;
 
-    public function __construct($node, $func=null)
+    /**
+     * MethodCall constructor.
+     * @param ParserMethodCall|ParserNew $node
+     * @param ClassMethod|null $func
+     * @throws \Exception
+     */
+    public function __construct($node, ClassMethod $func=null)
     {
         if($node instanceof ParserMethodCall) {
             $this->name = $node->name;
@@ -43,23 +57,35 @@ class MethodCall extends ExprCall
         $this->countUse = 0;
     }
 
+    /**
+     * @return bool
+     */
     public function isClassFixed()
     {
         return $this->owner instanceof Node\Identifier or
             $this->owner instanceof Node\Name;
     }
 
+    /**
+     * @return bool
+     */
     public function isStrict()
     {
         return $this->name instanceof Node\Identifier or
             $this->name instanceof Node\Name;
     }
 
+    /**
+     * @return string
+     */
     public function getMethodName()
     {
         return $this->owner."->".$this->name;
     }
 
+    /**
+     * @return string
+     */
     public function getRegex() {
         $regex = "/^";
         $regex .= $this->owner === "*" ?

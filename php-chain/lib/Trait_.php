@@ -10,9 +10,18 @@ namespace PhpChain;
 
 use PhpParser\Node\Stmt\Trait_ as ParserTrait;
 
+/**
+ * Class Trait_
+ * @package PhpChain
+ */
 class Trait_ extends ClassLike
 {
-    public static function create(ParserTrait $node, $knowledge) {
+    /**
+     * @param ParserTrait $node
+     * @param ProjectKnowledge $knowledge
+     * @return Trait_
+     */
+    public static function create(ParserTrait $node, ProjectKnowledge $knowledge) {
         return new self($node->namespacedName, $node, $knowledge);
     }
 }

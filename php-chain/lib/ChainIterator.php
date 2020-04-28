@@ -9,29 +9,52 @@
 namespace PhpChain;
 
 
+/**
+ * Class ChainIterator
+ * @package PhpChain
+ */
 class ChainIterator implements \Iterator
 {
-    private $index;
-    private $node;
+    /**
+     * @var int
+     */
+    private int $index;
+    /**
+     * @var Chain
+     */
+    private Chain $node;
 
-    public function __construct($root)
+    /**
+     * ChainIterator constructor.
+     * @param Chain $root
+     */
+    public function __construct(Chain $root)
     {
         $this->index = 0;
         $this->node = $root;
     }
 
+    /**
+     *
+     */
     public function next()
     {
         $this->node = $this->node->next();
         $this->index++;
     }
 
+    /**
+     *
+     */
     public function prev()
     {
         $this->node = $this->node->prev();
         $this->index--;
     }
 
+    /**
+     *
+     */
     public function rewind()
     {
         while ($this->node->prev()){
@@ -40,6 +63,9 @@ class ChainIterator implements \Iterator
         $this->index = 0;
     }
 
+    /**
+     * @return mixed|Chain|null
+     */
     public function current()
     {
         if($this->valid()){
@@ -48,11 +74,17 @@ class ChainIterator implements \Iterator
         return null;
     }
 
+    /**
+     * @return int
+     */
     public function key()
     {
         return $this->index;
     }
 
+    /**
+     * @return bool
+     */
     public function valid()
     {
         return $this->node instanceof Chain;

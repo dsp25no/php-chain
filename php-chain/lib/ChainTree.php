@@ -9,17 +9,44 @@
 namespace PhpChain;
 
 
+/**
+ * Class ChainTree
+ * @package PhpChain
+ */
 class ChainTree implements \JsonSerializable
 {
-    private $children;
+    /**
+     * @var \SplObjectStorage<ExprCall, ChainTree>
+     */
+    private \SplObjectStorage $children;
+    /**
+     * @var \SplObjectStorage<ChainTree, ExprCall>
+     */
     private $reverseMapping;
-    private $parent;
-    private $function;
+    /**
+     * @var ChainTree
+     */
+    private ChainTree $parent;
+    /**
+     * @var FunctionLike
+     */
+    private FunctionLike $function;
+    // TODO add type
     private $metric;
-    private $dfg;
-    private $depth;
+    /**
+     * @var Dfg
+     */
+    private Dfg $dfg;
+    /**
+     * @var int
+     */
+    private int $depth;
 
-    public function __construct($function)
+    /**
+     * ChainTree constructor.
+     * @param FunctionLike $function
+     */
+    public function __construct(FunctionLike $function)
     {
         $this->function = $function;
         $this->children = new \SplObjectStorage();
@@ -27,30 +54,50 @@ class ChainTree implements \JsonSerializable
         $this->depth = 0;
     }
 
+    /**
+     * @param $value
+     */
     public function setMetric($value) {
         $this->metric = $value;
     }
 
+    /**
+     * @return bool
+     */
     public function hasMetric() {
         return $this->metric != 0;
     }
 
+    /**
+     * @return float
+     */
     public function  getMetric() {
         return $this->metric;
     }
 
 
+    /**
+     * @return \SplObjectStorage
+     */
     public function getChildren()
     {
         return $this->children;
     }
 
-    public function getChildByCall($call)
+    /**
+     * @param ExprCall $call
+     * @return object
+     */
+    public function getChildByCall(ExprCall $call)
     {
         return $this->children[$call];
     }
 
-    public function getChildByFuncName($func_name)
+    /**
+     * @param string $func_name
+     * @return ChainTree
+     */
+    public function getChildByFuncName(string $func_name)
     {
         foreach ($this->children as $call) {
             $node = $this->children[$call];
@@ -60,25 +107,37 @@ class ChainTree implements \JsonSerializable
         }
     }
 
+    /**
+     * @return ChainTree
+     */
     public function getParent()
     {
         return $this->parent;
     }
 
+    /**
+     * @return FunctionLike
+     */
     public function value()
     {
         return $this->function;
     }
 
+    /**
+     * @return ChainTree
+     */
     public function getRoot()
     {
         $item = $this;
-        while($item->parent) {
+        while(isset($item->parent)) {
             $item = $item->parent;
         }
         return $item;
     }
 
+    /**
+     * @return \Generator
+     */
     public function walk()
     {
         foreach ($this->children as $call) {
@@ -87,6 +146,9 @@ class ChainTree implements \JsonSerializable
         }
     }
 
+    /**
+     * @return \Generator
+     */
     public function reverseWalk()
     {
         foreach ($this->children as $call) {
@@ -95,7 +157,12 @@ class ChainTree implements \JsonSerializable
         }
     }
 
-    public function addChildren($function, $call)
+    /**
+     * @param FunctionLike $function
+     * @param ExprCall|\stdClass $call
+     * @return ChainTree
+     */
+    public function addChildren(FunctionLike $function, $call)
     {
         $node = new ChainTree($function);
         $this->children[$call] = $node;
@@ -105,7 +172,10 @@ class ChainTree implements \JsonSerializable
         return $node;
     }
 
-    public function addChain($chain)
+    /**
+     * @param Chain $chain
+     */
+    public function addChain(Chain $chain)
     {
         $root = $this->getRoot();
         $reverse_chain = $chain->last();
@@ -122,7 +192,12 @@ class ChainTree implements \JsonSerializable
         }
     }
 
-    private function findNode($function, $maxDepth)
+    /**
+     * @param FunctionLike $function
+     * @param int $maxDepth
+     * @return \Generator
+     */
+    private function findNode(FunctionLike $function, int $maxDepth)
     {
         if($maxDepth > $this->depth) {
             foreach ($this->children as $call) {
@@ -136,13 +211,18 @@ class ChainTree implements \JsonSerializable
         }
     }
 
-    public function getChainsStartFrom($function, $maxLen)
+    /**
+     * @param FunctionLike $function
+     * @param int $maxLen
+     * @return \Generator
+     */
+    public function getChainsStartFrom(FunctionLike $function, int $maxLen)
     {
         foreach ($this->findNode($function, $maxLen) as $node) {
             $chain = new Chain($node->function);
             $call = $node->parent->reverseMapping[$node];
             $node = $node->parent;
-            while ($node->parent) {
+            while (isset($node->parent)) {
                 $chain->append(new Chain($node->function), $call);
                 $call = $node->parent->reverseMapping[$node];
                 $node = $node->parent;
@@ -151,25 +231,35 @@ class ChainTree implements \JsonSerializable
         }
     }
 
-    public function setDfg($dfg)
+    /**
+     * @param Dfg $dfg
+     * @throws \Exception
+     */
+    public function setDfg(Dfg $dfg)
     {
-        if($this->dfg) {
+        if(isset($this->dfg)) {
             throw new \Exception("DFG exists!");
         }
         $this->dfg = $dfg;
     }
 
+    /**
+     * @return Dfg
+     */
     public function getDfg()
     {
         return $this->dfg;
     }
 
+    /**
+     * @return array|mixed
+     */
     public function jsonSerialize()
     {
         $json = [
             "function" => $this->function->getFullName()
         ];
-        if($this->metric) {
+        if(isset($this->metric)) {
             $json["metric"] = $this->metric;
         }
         $json["children"] = [];
@@ -178,7 +268,7 @@ class ChainTree implements \JsonSerializable
             $node = $this->children[$call];
             $json["children"][] = $node->jsonSerialize();
         }
-        if($this->metric) {
+        if(isset($this->metric)) {
             usort($json["children"],
                 function ($a, $b) {
                     return strval($a["metric"]) < strval($b["metric"]);

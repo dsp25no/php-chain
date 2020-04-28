@@ -8,33 +8,70 @@
 
 namespace PhpChain;
 
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassLike as ParserClassLike;
 
+/**
+ * Class ClassLike
+ * @package PhpChain
+ */
 abstract class ClassLike
 {
-    public $knowledge;
-    public $name;
-    public $namespacedName;
+    /**
+     * @var ProjectKnowledge
+     */
+    public ProjectKnowledge $knowledge;
+    /**
+     * @var Name
+     */
+    public Name $name;
+    /**
+     * @var string
+     */
+    public string $namespacedName;
+    /**
+     * @var
+     */
     public $attributes;
-    protected $methods;
-    protected $node;
+    /**
+     * @var ClassMethod[]
+     */
+    protected array $methods;
+    /**
+     * @var ParserClassLike
+     */
+    protected ParserClassLike $node;
 
-    protected function __construct($name, $node, $knowledge, array $attributes = [])
+    /**
+     * ClassLike constructor.
+     * @param Name $name
+     * @param ParserClassLike $node
+     * @param ProjectKnowledge $knowledge
+     * @param array $attributes
+     */
+    protected function __construct(Name $name, ParserClassLike $node, ProjectKnowledge $knowledge, array $attributes = [])
     {
         $this->name = $name;
         $this->node = $node;
         $this->knowledge = $knowledge;
-        $this->methods = null;
     }
 
-    public static function create(ParserClassLike $node, $knowledge)
+    /**
+     * @param ParserClassLike $node
+     * @param ProjectKnowledge $knowledge
+     * @return mixed
+     */
+    public static function create(ParserClassLike $node, ProjectKnowledge $knowledge)
     {
         $type = __NAMESPACE__.'\\'.explode('_', $node->getType())[1].'_';
         $class = $type::create($node, $knowledge);
         return $class;
     }
 
-    public function addMethod($method)
+    /**
+     * @param ClassMethod $method
+     */
+    public function addMethod(ClassMethod $method)
     {
         $this->methods[strval($method->name)] = $method;
     }

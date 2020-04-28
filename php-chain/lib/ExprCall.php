@@ -11,11 +11,11 @@ namespace PhpChain;
 
 abstract class ExprCall
 {
-    public $name;
+    public string $name;
     public $argsCount;
     public $node;
     public $countUse;
-    protected $targetArgs;
+    protected array $targetArgs;
 
     public function setTargetArgs($targetArgs)
     {

@@ -11,26 +11,58 @@ namespace PhpChain;
 use PhpParser\{Node, NodeFinder};
 use PhpChain\ExprCall\{FuncCall, MethodCall};
 
+/**
+ * Class FunctionLike
+ * @package PhpChain
+ */
 abstract class FunctionLike
 {
+    /**
+     * @var \PhpParser\Node\Identifier|string
+     */
     public $name;
+    /**
+     * @var
+     */
     public $params;
+    /**
+     * @var array
+     */
     public $attributes = [];
-    public $node;
-    protected $_string;
-    protected $_calls;
+    /**
+     * @var Node\FunctionLike|null
+     */
+    public ?Node\FunctionLike $node;
+    /**
+     * @var string
+     */
+    protected string $_string;
+    /**
+     * @var ExprCall[]
+     */
+    protected array $_calls;
 
-    public function __construct($name, $node, $params, array $attributes = [])
+    /**
+     * FunctionLike constructor.
+     * @param string $name
+     * @param Node\FunctionLike|null $node
+     * @param $params
+     * @param array $attributes
+     */
+    public function __construct(string $name, ?Node\FunctionLike $node, $params, array $attributes = [])
     {
         $this->name = $name;
         $this->node = $node;
         $this->params = $params;
-        $this->_calls = null;
     }
 
+    /**
+     * @return ExprCall[]
+     * @throws \Exception
+     */
     public function extractCalls()
     {
-        if ($this->_calls) {
+        if (isset($this->_calls)) {
             return $this->_calls;
         }
         $nodeFinder = new NodeFinder;
@@ -59,6 +91,9 @@ abstract class FunctionLike
         return $this->_calls;
     }
 
+    /**
+     * @return int
+     */
     public function getNumberOfRequiredParameters()
     {
         for($i = sizeof($this->params) - 1; $i >= 0; $i--) {
@@ -70,14 +105,20 @@ abstract class FunctionLike
         return 0;
     }
 
+    /**
+     * @return string
+     */
     public function getFullName()
     {
         return strval($this->name);
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        if($this->_string) {
+        if(isset($this->_string)) {
             return $this->_string;
         }
         if($this->params) {

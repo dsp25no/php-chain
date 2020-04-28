@@ -10,12 +10,31 @@ namespace PhpChain;
 
 use PhpChain\ExprCall\FuncCall;
 
+/**
+ * Class ProjectKnowledge
+ * @package PhpChain
+ */
 class ProjectKnowledge {
-    private $classes;
-    private $functions;
-    private $methods;
-    private $__call_methods;
+    /**
+     * @var ClassLike[]
+     */
+    private array $classes;
+    /**
+     * @var Function_[]
+     */
+    private array $functions;
+    /**
+     * @var ClassMethod[]
+     */
+    private array $methods;
+    /**
+     * @var ClassMethod[]
+     */
+    private array $__call_methods;
 
+    /**
+     * ProjectKnowledge constructor.
+     */
     public function __construct()
     {
         $this->classes = [];
@@ -23,42 +42,73 @@ class ProjectKnowledge {
         $this->methods = [];
     }
 
+
+    /**
+     * @return ClassLike[]
+     */
     public function &getClasses()
     {
         return $this->classes;
     }
 
+    /**
+     * @return Function_[]
+     */
     public function &getFunctions()
     {
         return $this->functions;
     }
 
+    /**
+     * @return ClassMethod[]
+     */
     public function &getMethods()
     {
         return $this->methods;
     }
 
+    /**
+     * @param string $name
+     * @return ClassLike
+     */
     public function getClass(string $name) {
         return $this->classes[$name];
     }
 
+    /**
+     * @param string $name
+     * @return Function_
+     */
     public function getFunction(string $name) {
         return $this->functions[$name];
     }
 
+    /**
+     * @param string $name
+     * @return ClassMethod
+     */
     public function getMethod(string $name) {
         return $this->methods[$name];
     }
 
-    public function addClass($class) {
+    /**
+     * @param ClassLike $class
+     */
+    public function addClass(ClassLike $class) {
         $this->classes[strval($class->name)] = $class;
     }
 
-    public function addFunction($function) {
+    /**
+     * @param Function_ $function
+     */
+    public function addFunction(Function_ $function) {
         $this->functions[$function->getFullName()] = $function;
     }
 
-    public function addMethod($method) {
+    /**
+     * @param ClassMethod $method
+     */
+    public function addMethod(ClassMethod $method) {
         $fullName = $method->getFullName();
         $this->methods[$fullName] = $method;
         if($method->name == "__call") {
@@ -66,7 +116,12 @@ class ProjectKnowledge {
         }
     }
 
-    public function getFunctionLikeByCall($call, $strict=true)
+    /**
+     * @param ExprCall $call
+     * @param bool $strict
+     * @return \Iterator|array
+     */
+    public function getFunctionLikeByCall(ExprCall $call, $strict=true)
     {
         if ($call instanceof FuncCall) {
             $regex = $call->getRegex();

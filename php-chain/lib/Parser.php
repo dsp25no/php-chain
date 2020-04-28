@@ -7,15 +7,39 @@ use PhpParser\NodeVisitor\NameResolver;
 use PhpChain\AstVisitor\{Collector, LoopResolver, ArrayAccessResolver};
 
 
+/**
+ * Class Parser
+ * @package PhpChain
+ */
 class Parser
 {
-    private $target;
-    private $parser;
-    private $traverser;
-    private $visitors = [];
-    private $knowledge;
+    /**
+     * @var string
+     */
+    private string $target;
+    /**
+     * @var \PhpParser\Parser
+     */
+    private \PhpParser\Parser $parser;
+    /**
+     * @var NodeTraverser
+     */
+    private NodeTraverser $traverser;
+    /**
+     * @var \PhpParser\NodeVisitor[]
+     */
+    private array $visitors = [];
+    /**
+     * @var ProjectKnowledge
+     */
+    private ProjectKnowledge $knowledge;
 
-    public function __construct($target, $config)
+    /**
+     * Parser constructor.
+     * @param string $target
+     * @param $config
+     */
+    public function __construct(string $target, $config)
     {
         $this->target = $target;
         $this->knowledge = new ProjectKnowledge();
@@ -34,6 +58,9 @@ class Parser
         }
     }
 
+    /**
+     *
+     */
     public function collectMethods() {
         foreach ($this->knowledge->getClasses() as $class) {
             if(!$class instanceof Class_ or $class->isAbstract()) {
@@ -47,6 +74,9 @@ class Parser
         }
     }
 
+    /**
+     * @return ProjectKnowledge
+     */
     public function parse()
     {
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->target));

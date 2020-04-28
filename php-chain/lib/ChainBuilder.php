@@ -10,23 +10,48 @@ use PhpChain\ExprCall\FuncCall;
  * @api FindAllChains
  */
 class ChainBuilder{
+    /**
+     * @var string[]
+     */
     private $system = [];
+    /**
+     * @var ProjectKnowledge
+     */
     private $knowledge;
+    /**
+     * @var ChainTree
+     */
     private $chainTree;
+    /**
+     * @var \SplObjectStorage
+     */
     private $checked;
+    /**
+     * @var int
+     */
     private $depth;
+    /**
+     * @var string[]
+     */
     private $magic;
 
+    /**
+     * @var bool
+     */
     private $not_call;
 
     //@todo make it optimal returning chain tails
+    /**
+     * @var \SplObjectStorage
+     */
     private $system_inside;
 
     /**
      * BuildChain constructor.
-     * @param $system : list of system calls we're interested in
+     * @param ProjectKnowledge $knowledge
+     * @param $config
      */
-    public function __construct($knowledge, $config)
+    public function __construct(ProjectKnowledge $knowledge, $config)
     {
         $this->system = $config["system"];
         $this->magic = $config["magic"];
@@ -50,7 +75,12 @@ class ChainBuilder{
         }
     }
 
-    private function getSuffixChain($function, $maxLen)
+    /**
+     * @param $function FunctionLike
+     * @param $maxLen int
+     * @return \Generator
+     */
+    private function getSuffixChain(FunctionLike $function, int $maxLen)
     {
         foreach ($this->chainTree->getChainsStartFrom($function, $maxLen) as $chain) {
             yield $chain;
@@ -58,12 +88,11 @@ class ChainBuilder{
     }
 
     /**
-     * @param $function_like
-     * @param $chain
-     * @return \Generator : new chain
-     * @throws \Exception
+     * @param Chain $chain
+     * @param int $depth
+     * @return \Generator
      */
-    private function findCritical($chain, $depth)
+    private function findCritical(Chain $chain, int $depth)
     {
         if ($depth <= $this->depth) {
             $calls = $chain->value()->extractCalls();
@@ -130,6 +159,11 @@ class ChainBuilder{
         }
     }
 
+    /**
+     * @param int $depth
+     * @return ChainTree
+     * @throws \Exception
+     */
     public function findAllChains($depth=10)
     {
         $this->depth = $depth;
@@ -147,11 +181,10 @@ class ChainBuilder{
     }
 
     /**
-     * Checks if call in system calls list
-     * @param $call
+     * @param ExprCall $call
      * @return bool
      */
-    private function isCallCritical($call)
+    private function isCallCritical(ExprCall $call)
     {
         return $call instanceof FuncCall and (
                 in_array($call->name, $this->system) or

@@ -8,27 +8,58 @@
 
 namespace PhpChain;
 
+use PhpParser\Node\Name;
+use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\Stmt\Class_ as ParserClass;
 
+/**
+ * Class Class_
+ * @package PhpChain
+ */
 class Class_ extends ClassLike
 {
-    private $extends;
-    private $implements;
-    private $_inherited_methods;
+    /**
+     * @var FullyQualified|null
+     */
+    private ?FullyQualified $extends;
+    /**
+     * @var Interface_[]
+     */
+    private array $implements;
+    /**
+     * @var ClassMethod[]
+     */
+    private array $_inherited_methods;
 
-    public function __construct($name, $node, $knowledge, $extends, array $implements, array $attributes = [])
+    /**
+     * Class_ constructor.
+     * @param Name $name
+     * @param ParserClass $node
+     * @param ProjectKnowledge $knowledge
+     * @param FullyQualified|null $extends
+     * @param Interface_[] $implements
+     * @param array $attributes
+     */
+    public function __construct(Name $name, ParserClass $node, ProjectKnowledge $knowledge, ?FullyQualified $extends, array $implements, array $attributes = [])
     {
         parent::__construct($name, $node, $knowledge, $attributes);
         $this->extends = $extends;
         $this->implements = $implements;
-        $this->_inherited_methods = null;
     }
 
-    public static function create(ParserClass $node, $knowledge)
+    /**
+     * @param ParserClass $node
+     * @param ProjectKnowledge $knowledge
+     * @return mixed|Class_
+     */
+    public static function create(ParserClass $node, ProjectKnowledge $knowledge)
     {
         return new self($node->namespacedName, $node, $knowledge, $node->extends, $node->implements);
     }
 
+    /**
+     * @return mixed|null
+     */
     public function getExtends()
     {
         if ($this->extends) {
@@ -37,6 +68,9 @@ class Class_ extends ClassLike
         return null;
     }
 
+    /**
+     * @return Interface_[]|null
+     */
     public function getImplements()
     {
         if ($this->implements) {
@@ -51,9 +85,12 @@ class Class_ extends ClassLike
         return null;
     }
 
+    /**
+     * @return ClassMethod[]
+     */
     private function getInheritedMethods()
     {
-        if ($this->_inherited_methods !== null) {
+        if (isset($this->_inherited_methods)) {
             return $this->_inherited_methods;
         }
         $this->_inherited_methods = [];
@@ -78,6 +115,9 @@ class Class_ extends ClassLike
         return $this->_inherited_methods;
     }
 
+    /**
+     * @return ClassMethod[]
+     */
     public function getMethods()
     {
         if($this->methods) {
@@ -86,6 +126,9 @@ class Class_ extends ClassLike
         return $this->getInheritedMethods();
     }
 
+    /**
+     * @return bool
+     */
     public function isAbstract()
     {
         return $this->node->isAbstract();

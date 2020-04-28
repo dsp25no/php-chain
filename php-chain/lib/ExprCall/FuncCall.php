@@ -11,8 +11,16 @@ namespace PhpChain\ExprCall;
 use PhpParser\Node\Expr\FuncCall as ParserFuncCall;
 use PhpChain\ExprCall;
 
+/**
+ * Class FuncCall
+ * @package PhpChain\ExprCall
+ */
 class FuncCall extends ExprCall
 {
+    /**
+     * FuncCall constructor.
+     * @param ParserFuncCall $node
+     */
     public function __construct(ParserFuncCall $node)
     {
         $this->name = $node->name;
@@ -21,6 +29,9 @@ class FuncCall extends ExprCall
         $this->countUse = 0;
     }
 
+    /**
+     * @return string
+     */
     public function getRegex() {
         $regex = "/^";
         $regex .= $this->name . "\(";
