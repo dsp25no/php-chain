@@ -4,9 +4,12 @@
 
 namespace PhpChain;
 
-class TargetVar {
+
+class TargetVar
+{
     public $var;
     public $value;
+    public $usedIn;
     private $category;
     private $metric;
     private $dfg;

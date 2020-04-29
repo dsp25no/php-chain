@@ -21,15 +21,17 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
     {
     }
 
-    private function addToScope($variables)
+    private function addToScope($variables, $usage)
     {
         if (! is_array($variables)) {
             $variables = [$variables];
         }
         foreach ($variables as $variable) {
             $target_var = $this->dfg->getTargetVar($variable);
+            Dfg::addUsedIn($target_var, $usage);
             foreach ($target_var->var->ops as $var_op) {
-                $this->dfg->getTargetOp($var_op);
+                $target_op = $this->dfg->getTargetOp($var_op);
+                Dfg::addUsedIn($target_op, $usage);
             }
         }
     }
@@ -50,10 +52,11 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
                 for ($i = 0; $i < sizeof($op->args); $i++) {
                     if (in_array($i, $important_params)) {
                         // add vars and ops to scope
-                        $this->addToScope($op->args[$i]);
-                        $target_var = $this->dfg->getTargetVar($op->args[$i]);
+                        $this->addToScope($op->args[$i], Dfg::TARGET_CALL);
+                        $target_var = $this->dfg->getTargetVar($op->args[$i], true);
                         $this->dfg->setOutputParam($target_var, $i);
                         $target_var->setOut();
+                        Dfg::addUsedIn($target_var, Dfg::TARGET_CALL);
                     }
                 }
             }
@@ -80,7 +83,9 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
         }
         //check whether result goes to return statement
         foreach ($usages as $usage) {
-            if ($usage instanceof Op\Terminal\Return_ and $this->dfg->getTargetOp($usage, true)) {
+            if ($usage instanceof Op\Terminal\Return_ and $target_usage = $this->dfg->getTargetOp($usage, true)) {
+                $target_op = $this->dfg->getTargetOp($op);
+                Dfg::addUsedIn($target_op, $target_usage->usedIn);
                 return true;
             }
         }
@@ -97,12 +102,13 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
         if ($op !== $this->op) {
             // add ops and vars to scope
             $target_op = $this->dfg->getTargetOp($op);
-            $this->addToScope($target_op->getArguments());
+            $this->addToScope($target_op->getArguments(), $target_op->usedIn);
             // for anonymous functions
             if ($op instanceof Op\Expr\Closure ) {
                 if ($func = $op->getFunc()) {
                     $return  = $func->cfg->children[count($func->cfg->children)-1];
-                    $this->dfg->getTargetOp($return);
+                    $target_return = $this->dfg->getTargetOp($return);
+                    Dfg::addUsedIn($target_return, $target_op->usedIn);
                 }
             }
         }
@@ -114,7 +120,8 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
         foreach ($block->parents as $parent) {
             if ($parent->children) {
                 $cond = $parent->children[count($parent->children) - 1];
-                $this->dfg->getTargetOp($cond);
+                $target_op = $this->dfg->getTargetOp($cond);
+                Dfg::addUsedIn($target_op, Dfg::CONDITION);
             }
         }
 
@@ -123,8 +130,7 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
             foreach ($phi->result->usages as $phi_usage) {
                 if ($target_op = $this->dfg->getTargetOp($phi_usage, true)) {
                     $target_phi = $this->dfg->getTargetOp($phi);
-                    $this->addToScope($target_phi->getArguments());
-                    break;
+                    $this->addToScope($target_phi->getArguments(), $target_op->usedIn);
                 }
             }
         }
