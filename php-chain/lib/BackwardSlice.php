@@ -106,6 +106,10 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
                 }
             }
         }
+    }
+
+    public function leaveBlock(Block $block, Block $prior = null)
+    {
         // add if-else condition or other parent last stmt
         foreach ($block->parents as $parent) {
             if ($parent->children) {
@@ -113,15 +117,16 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
                 $this->dfg->getTargetOp($cond);
             }
         }
+
         // add phi to scope
         foreach ($block->phi as $phi) {
-            $target_op = $this->dfg->getTargetOp($phi);
-            $this->addToScope($target_op->getArguments());
+            foreach ($phi->result->usages as $phi_usage) {
+                if ($target_op = $this->dfg->getTargetOp($phi_usage, true)) {
+                    $this->addToScope($target_op->getArguments());
+                    break;
+                }
+            }
         }
-    }
-
-    public function leaveBlock(Block $block, Block $prior = null)
-    {
     }
 
     public function skipBlock(Block $block, Block $prior = null)
