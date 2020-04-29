@@ -122,7 +122,8 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
         foreach ($block->phi as $phi) {
             foreach ($phi->result->usages as $phi_usage) {
                 if ($target_op = $this->dfg->getTargetOp($phi_usage, true)) {
-                    $this->addToScope($target_op->getArguments());
+                    $target_phi = $this->dfg->getTargetOp($phi);
+                    $this->addToScope($target_phi->getArguments());
                     break;
                 }
             }
