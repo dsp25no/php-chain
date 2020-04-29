@@ -1,10 +1,12 @@
 <?php
+
 /**
  */
 
 namespace PhpChain;
 
-class TargetVar {
+class TargetVar
+{
     public $var;
     public $value;
     private $category;
@@ -17,7 +19,7 @@ class TargetVar {
         $this->var = $operand;
         $this->dfg = $dfg;
         $this->metric = 1.0;
-        $this->processing = False;
+        $this->processing = false;
     }
 
     private function classify()
@@ -49,9 +51,9 @@ class TargetVar {
     public function getCategory()
     {
         if (!$this->category && !$this->processing) {
-            $this->processing = True; //TODO: move to classify
+            $this->processing = true; //TODO: move to classify
             $this->classify();
-            $this->processing = False;
+            $this->processing = false;
         } elseif ($this->processing) {
             return "TMP";
         }
@@ -60,14 +62,15 @@ class TargetVar {
 
     public function updateCategory($category)
     {
-        if($this->processing)
+        if ($this->processing) {
             return;
+        }
         $this->processing = true;
         $this->category = $category;
         $this->metric = TargetVar::getNumber($this->category);
         foreach ($this->var->usages as $op) {
-            $target_op = $this->dfg->getTargetOp($op, True);
-            if($target_op) {
+            $target_op = $this->dfg->getTargetOp($op, true);
+            if ($target_op) {
                 $target_op->updateCategory();
             }
         }

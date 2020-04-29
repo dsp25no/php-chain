@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -7,7 +8,6 @@
  */
 
 namespace PhpChain;
-
 
 abstract class ExprCall
 {

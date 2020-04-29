@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -14,6 +15,7 @@ use PhpParser\Node\Stmt\Trait_ as ParserTrait;
  * Class Trait_
  * @package PhpChain
  */
+// phpcs:ignore
 class Trait_ extends ClassLike
 {
     /**
@@ -21,7 +23,8 @@ class Trait_ extends ClassLike
      * @param ProjectKnowledge $knowledge
      * @return Trait_
      */
-    public static function create(ParserTrait $node, ProjectKnowledge $knowledge) {
+    public static function create(ParserTrait $node, ProjectKnowledge $knowledge)
+    {
         return new self($node->namespacedName, $node, $knowledge);
     }
 }

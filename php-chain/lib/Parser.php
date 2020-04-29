@@ -6,7 +6,6 @@ use PhpParser\{ParserFactory,NodeTraverser};
 use PhpParser\NodeVisitor\NameResolver;
 use PhpChain\AstVisitor\{Collector, LoopResolver, ArrayAccessResolver};
 
-
 /**
  * Class Parser
  * @package PhpChain
@@ -43,14 +42,14 @@ class Parser
     {
         $this->target = $target;
         $this->knowledge = new ProjectKnowledge();
-        $this->parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
-        $this->traverser = new NodeTraverser;
-        $this->visitors[] = new NameResolver;
+        $this->parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $this->traverser = new NodeTraverser();
+        $this->visitors[] = new NameResolver();
         $this->visitors[] = new Collector($this->knowledge);
-        if($config["features"]["foreach"]) {
+        if ($config["features"]["foreach"]) {
             $this->visitors[] = new LoopResolver();
         }
-        if($config["features"]["offsetGet"]) {
+        if ($config["features"]["offsetGet"]) {
             $this->visitors[] = new ArrayAccessResolver();
         }
         foreach ($this->visitors as $visitor) {
@@ -61,9 +60,10 @@ class Parser
     /**
      *
      */
-    public function collectMethods() {
+    public function collectMethods()
+    {
         foreach ($this->knowledge->getClasses() as $class) {
-            if(!$class instanceof Class_ or $class->isAbstract()) {
+            if (!$class instanceof Class_ or $class->isAbstract()) {
                 continue; // Don't load interfaces' methods, because they don't have body
                 // and abstract classes' methods^ because we can't create object of abstract class
             }
@@ -94,9 +94,8 @@ class Parser
                 $stmts = $this->parser->parse($code);
 
                 $this->traverser->traverse($stmts);
-
             } catch (\PhpParser\Error $e) {
-                echo "Fail to parse $filename: ", $e->getMessage().PHP_EOL;
+                echo "Fail to parse $filename: ", $e->getMessage() . PHP_EOL;
             }
         }
         $this->collectMethods();

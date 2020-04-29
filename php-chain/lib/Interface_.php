@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -15,6 +16,7 @@ use PhpParser\Node\Stmt\Interface_ as ParserInterface;
  * Class Interface_
  * @package PhpChain
  */
+// phpcs:ignore
 class Interface_ extends ClassLike
 {
     /**
@@ -30,8 +32,13 @@ class Interface_ extends ClassLike
      * @param Interface_[] $extends
      * @param array $attributes
      */
-    public function __construct(Name $name, ParserInterface $node, ProjectKnowledge $knowledge, array $extends, array $attributes = [])
-    {
+    public function __construct(
+        Name $name,
+        ParserInterface $node,
+        ProjectKnowledge $knowledge,
+        array $extends,
+        array $attributes = []
+    ) {
         parent::__construct($name, $node, $knowledge, $attributes);
         $this->extends = $extends;
     }
@@ -54,7 +61,7 @@ class Interface_ extends ClassLike
         if ($this->extends) {
             $res = [];
             foreach ($this->extends as $extend) {
-                if($extend) {
+                if ($extend) {
                     $res[] = $this->knowledge->getClass([strval($extend)]);
                 }
             }

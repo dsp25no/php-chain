@@ -1,4 +1,5 @@
 <?php
+
 /**
  */
 
@@ -6,7 +7,8 @@ namespace PhpChain;
 
 use PHPCfg;
 
-class Dfg {
+class Dfg
+{
     private $script;
     private $call;
     private $output_params = [];
@@ -23,29 +25,29 @@ class Dfg {
         $this->targetOps = new \SplObjectStorage();
     }
 
-    public function getTargetVar($var, $strict=False)
+    public function getTargetVar($var, $strict = false)
     {
-        if(!isset($this->targetVars[$var]) and !$strict) {
+        if (!isset($this->targetVars[$var]) and !$strict) {
             $this->targetVars[$var] = new TargetVar($var, $this);
         }
-        if(isset($this->targetVars[$var])) {
+        if (isset($this->targetVars[$var])) {
             return $this->targetVars[$var];
         }
     }
 
-    public function getTargetOp($op, $strict=False)
+    public function getTargetOp($op, $strict = false)
     {
-        if(!isset($this->targetOps[$op]) and !$strict) {
+        if (!isset($this->targetOps[$op]) and !$strict) {
             $this->targetOps[$op] = new TargetOp($op, $this);
         }
-        if(isset($this->targetOps[$op])) {
+        if (isset($this->targetOps[$op])) {
             return $this->targetOps[$op];
         }
     }
 
     private function findBlockAndOp()
     {
-        $traverser = new PHPCfg\Traverser;
+        $traverser = new PHPCfg\Traverser();
         $finder = new FindBlockAndOP($this->call);
         $traverser->addVisitor($finder);
         $traverser->traverse($this->script);
@@ -55,7 +57,7 @@ class Dfg {
     private function buildScope($start_op)
     {
         $important_params = $this->call->getTargetArgs();
-        if(!$start_op->args) {
+        if (!$start_op->args) {
             // function don't have arguments
             return;
         }
@@ -104,7 +106,7 @@ class Dfg {
     {
         $params = $this->script->functions[0]->params;
         $nums = [];
-        for($i = 0; $i < sizeof($params); $i++) {
+        for ($i = 0; $i < sizeof($params); $i++) {
             if (isset($this->targetOps[$params[$i]])) {
                 $nums[] = $i;
                 $this->input_params[$i] = $this->targetOps[$params[$i]];
@@ -120,7 +122,7 @@ class Dfg {
 
     public function matchOutputInput($prev_output)
     {
-        foreach ($prev_output as $index=>$var) {
+        foreach ($prev_output as $index => $var) {
             $this->input_params[$index]->updateCategory($var->getCategory());
         }
     }

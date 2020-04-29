@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -8,8 +9,7 @@
 
 namespace PhpChain;
 
-
 interface TreePrinter
 {
-    static public function print(ChainTree $tree);
+    public static function print(ChainTree $tree);
 }

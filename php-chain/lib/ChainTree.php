@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -7,7 +8,6 @@
  */
 
 namespace PhpChain;
-
 
 /**
  * Class ChainTree
@@ -57,21 +57,24 @@ class ChainTree implements \JsonSerializable
     /**
      * @param $value
      */
-    public function setMetric($value) {
+    public function setMetric($value)
+    {
         $this->metric = $value;
     }
 
     /**
      * @return bool
      */
-    public function hasMetric() {
+    public function hasMetric()
+    {
         return $this->metric != 0;
     }
 
     /**
      * @return float
      */
-    public function  getMetric() {
+    public function getMetric()
+    {
         return $this->metric;
     }
 
@@ -101,7 +104,7 @@ class ChainTree implements \JsonSerializable
     {
         foreach ($this->children as $call) {
             $node = $this->children[$call];
-            if($node->function->getFullName() == $func_name) {
+            if ($node->function->getFullName() == $func_name) {
                 return $node;
             }
         }
@@ -129,7 +132,7 @@ class ChainTree implements \JsonSerializable
     public function getRoot()
     {
         $item = $this;
-        while(isset($item->parent)) {
+        while (isset($item->parent)) {
             $item = $item->parent;
         }
         return $item;
@@ -183,7 +186,7 @@ class ChainTree implements \JsonSerializable
         $root = $root->getChildByFuncName($system_function->getFullName());
         while ($reverse_chain = $reverse_chain->prev()) {
             $call = $reverse_chain->getCall();
-            if(isset($root->children[$call])) {
+            if (isset($root->children[$call])) {
                 $root = $root->children[$call];
             } else {
                 $function = $reverse_chain->value();
@@ -199,7 +202,7 @@ class ChainTree implements \JsonSerializable
      */
     private function findNode(FunctionLike $function, int $maxDepth)
     {
-        if($maxDepth > $this->depth) {
+        if ($maxDepth > $this->depth) {
             foreach ($this->children as $call) {
                 $node = $this->children[$call];
                 if ($node->function === $function) {
@@ -237,7 +240,7 @@ class ChainTree implements \JsonSerializable
      */
     public function setDfg(Dfg $dfg)
     {
-        if(isset($this->dfg)) {
+        if (isset($this->dfg)) {
             throw new \Exception("DFG exists!");
         }
         $this->dfg = $dfg;
@@ -259,7 +262,7 @@ class ChainTree implements \JsonSerializable
         $json = [
             "function" => $this->function->getFullName()
         ];
-        if(isset($this->metric)) {
+        if (isset($this->metric)) {
             $json["metric"] = $this->metric;
         }
         $json["children"] = [];
@@ -268,8 +271,9 @@ class ChainTree implements \JsonSerializable
             $node = $this->children[$call];
             $json["children"][] = $node->jsonSerialize();
         }
-        if(isset($this->metric)) {
-            usort($json["children"],
+        if (isset($this->metric)) {
+            usort(
+                $json["children"],
                 function ($a, $b) {
                     return strval($a["metric"]) < strval($b["metric"]);
                 }

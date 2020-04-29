@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -14,6 +15,7 @@ use PhpParser\Node\Stmt\Function_ as ParserFunction;
  * Class Function_
  * @package PhpChain
  */
+// phpcs:ignore
 class Function_ extends FunctionLike
 {
     /**

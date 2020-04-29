@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -32,7 +33,8 @@ class FuncCall extends ExprCall
     /**
      * @return string
      */
-    public function getRegex() {
+    public function getRegex()
+    {
         $regex = "/^";
         $regex .= $this->name . "\(";
         $regex .= "r{0," . $this->argsCount . "}[^r]*\)";

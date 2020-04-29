@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -36,11 +37,11 @@ abstract class FunctionLike
     /**
      * @var string
      */
-    protected string $_string;
+    protected string $string;
     /**
      * @var ExprCall[]
      */
-    protected array $_calls;
+    protected array $calls;
 
     /**
      * FunctionLike constructor.
@@ -62,33 +63,35 @@ abstract class FunctionLike
      */
     public function extractCalls()
     {
-        if (isset($this->_calls)) {
-            return $this->_calls;
+        if (isset($this->calls)) {
+            return $this->calls;
         }
-        $nodeFinder = new NodeFinder;
-        $calls = $nodeFinder->find($this->node->stmts, function(Node $node) {
+        $nodeFinder = new NodeFinder();
+        $calls = $nodeFinder->find($this->node->stmts, function (Node $node) {
             return $node instanceof Node\Expr\FuncCall or
                 $node instanceof Node\Expr\MethodCall or
                 $node instanceof Node\Expr\New_;
         });
-        $this->_calls = [];
+        $this->calls = [];
         foreach ($calls as $call) {
             if ($call instanceof Node\Expr\New_) {
-                $this->_calls[] = new MethodCall($call);
+                $this->calls[] = new MethodCall($call);
                 continue;
             }
-            if (!($call->name instanceof Node\Identifier or
+            if (
+                !($call->name instanceof Node\Identifier or
                 $call->name instanceof Node\Name or
-                $call->name instanceof Node\Expr\Variable)) {
+                $call->name instanceof Node\Expr\Variable)
+            ) {
                 continue;
             }
-            if ($call instanceof Node\Expr\FuncCall){
-                $this->_calls[] = new FuncCall($call);
+            if ($call instanceof Node\Expr\FuncCall) {
+                $this->calls[] = new FuncCall($call);
             } elseif ($call instanceof Node\Expr\MethodCall) {
-                $this->_calls[] = new MethodCall($call, $this);
+                $this->calls[] = new MethodCall($call, $this);
             }
         }
-        return $this->_calls;
+        return $this->calls;
     }
 
     /**
@@ -96,9 +99,9 @@ abstract class FunctionLike
      */
     public function getNumberOfRequiredParameters()
     {
-        for($i = sizeof($this->params) - 1; $i >= 0; $i--) {
+        for ($i = sizeof($this->params) - 1; $i >= 0; $i--) {
             $param = $this->params[$i];
-            if($param->default === null and !$param->variadic) {
+            if ($param->default === null and !$param->variadic) {
                 return $i + 1;
             }
         }
@@ -118,18 +121,18 @@ abstract class FunctionLike
      */
     public function __toString()
     {
-        if(isset($this->_string)) {
-            return $this->_string;
+        if (isset($this->string)) {
+            return $this->string;
         }
-        if($this->params) {
+        if ($this->params) {
             $required = $this->getNumberOfRequiredParameters();
             $optional = sizeof($this->params) - $required;
-            $this->_string = $this->name . "(" . str_repeat("r", $required) . \
+            $this->string = $this->name . "(" . str_repeat("r", $required) . \
                     str_repeat("o", $optional) . \
                     str_repeat("v", end($this->params)->variadic) . ")";
         } else {
-            $this->_string = $this->name . "()";
+            $this->string = $this->name . "()";
         }
-        return $this->_string;
+        return $this->string;
     }
 }

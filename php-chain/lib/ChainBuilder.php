@@ -9,7 +9,8 @@ use PhpChain\ExprCall\FuncCall;
  * Class ChainBuilder
  * @api FindAllChains
  */
-class ChainBuilder{
+class ChainBuilder
+{
     /**
      * @var string[]
      */
@@ -55,7 +56,7 @@ class ChainBuilder{
     {
         $this->system = $config["system"];
         $this->magic = $config["magic"];
-        if(!$config["features"]["__call"]) {
+        if (!$config["features"]["__call"]) {
             $this->not_call = true;
         }
         $this->knowledge = $knowledge;
@@ -64,14 +65,14 @@ class ChainBuilder{
         $this->chainTree = new ChainTree(new Function_("", null, null));
 
         $factory = new AstBuilder();
-        foreach($this->system as $function_name) {
+        foreach ($this->system as $function_name) {
             $function = $factory->function($function_name);
             $params = [];
             for ($i = 0; $i < $config["functions"][$function_name]["params"]; $i++) {
                 $params[] = $factory->param("p$i");
             }
             $function->addParams($params);
-            $this->chainTree->addChildren(Function_::create($function->getNode()), new \StdClass);
+            $this->chainTree->addChildren(Function_::create($function->getNode()), new \StdClass());
         }
     }
 
@@ -104,7 +105,7 @@ class ChainBuilder{
                 if ($this->isCallCritical($call)) {
                     //TODO(dsp25no): not optimal,
                     // add to tree any critical function node
-                    if($call->name instanceof \PhpParser\Node\Expr\Variable) {
+                    if ($call->name instanceof \PhpParser\Node\Expr\Variable) {
                         $critical_names = $this->system;
                     } else {
                         $critical_names = [$call->name];
@@ -127,9 +128,11 @@ class ChainBuilder{
 //                    }
                         if ($this->system_inside->contains($matched)) {
                             $this->system_inside->attach($chain->value());
-                            foreach ($this->getSuffixChain(
-                                        $matched,
-                                $this->depth - $depth) as $suffix
+                            foreach (
+                                $this->getSuffixChain(
+                                    $matched,
+                                    $this->depth - $depth
+                                ) as $suffix
                             ) {
                                 $chain->append($suffix, $call);
                                 $this->chainTree->addChain($chain);
@@ -137,14 +140,18 @@ class ChainBuilder{
                                 $chain->delTail();
                                 yield $result_chain;
                             }
-                        } elseif (!isset($this->checked[$matched])
+                        } elseif (
+                            !isset($this->checked[$matched])
                                     or $this->checked[$matched] > $depth
                         ) {
-                            if (yield from $this->findCritical($chain->append(
-                                                                    new Chain($matched),
-                                                                    $call
-                                                                ),
-                                                        $depth + 1)
+                            if (
+                                yield from $this->findCritical(
+                                    $chain->append(
+                                        new Chain($matched),
+                                        $call
+                                    ),
+                                    $depth + 1
+                                )
                             ) {
                                 $this->system_inside->attach($chain->value());
                             } else {
@@ -164,15 +171,15 @@ class ChainBuilder{
      * @return ChainTree
      * @throws \Exception
      */
-    public function findAllChains($depth=10)
+    public function findAllChains($depth = 10)
     {
         $this->depth = $depth;
         $methods = $this->knowledge->getMethods();
         $count = sizeof($methods);
         $i = 0;
         foreach ($methods as $method) {
-            echo $i++."/".$count."\r";
-            if(in_array(strval($method->name), $this->magic)) {
+            echo $i++ . "/" . $count . "\r";
+            if (in_array(strval($method->name), $this->magic)) {
                 foreach ($this->findCritical(new Chain($method), 1) as $new_chain) {
                 }
             }

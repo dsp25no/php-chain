@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -7,7 +8,6 @@
  */
 
 namespace PhpChain;
-
 
 /**
  * Class ChainIterator
@@ -57,7 +57,7 @@ class ChainIterator implements \Iterator
      */
     public function rewind()
     {
-        while ($this->node->prev()){
+        while ($this->node->prev()) {
             $this->prev();
         }
         $this->index = 0;
@@ -68,7 +68,7 @@ class ChainIterator implements \Iterator
      */
     public function current()
     {
-        if($this->valid()){
+        if ($this->valid()) {
             return $this->node;
         }
         return null;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -49,8 +50,12 @@ abstract class ClassLike
      * @param ProjectKnowledge $knowledge
      * @param array $attributes
      */
-    protected function __construct(Name $name, ParserClassLike $node, ProjectKnowledge $knowledge, array $attributes = [])
-    {
+    protected function __construct(
+        Name $name,
+        ParserClassLike $node,
+        ProjectKnowledge $knowledge,
+        array $attributes = []
+    ) {
         $this->name = $name;
         $this->node = $node;
         $this->knowledge = $knowledge;
@@ -63,7 +68,7 @@ abstract class ClassLike
      */
     public static function create(ParserClassLike $node, ProjectKnowledge $knowledge)
     {
-        $type = __NAMESPACE__.'\\'.explode('_', $node->getType())[1].'_';
+        $type = __NAMESPACE__ . '\\' . explode('_', $node->getType())[1] . '_';
         $class = $type::create($node, $knowledge);
         return $class;
     }

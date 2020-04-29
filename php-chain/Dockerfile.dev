@@ -12,8 +12,8 @@ WORKDIR /php-chain
 COPY composer.json .
 RUN composer install
 
+ENV PATH="/php-chain/vendor/bin:${PATH}"
+
 COPY test-project /target
 
-COPY lib lib
-COPY analyze.php .
-COPY config.php .
+COPY . .

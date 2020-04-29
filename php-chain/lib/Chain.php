@@ -31,7 +31,7 @@ class Chain
      * @param FunctionLike $function
      * @param ExprCall|null $call
      */
-    function __construct(FunctionLike $function, $call=null)
+    public function __construct(FunctionLike $function, $call = null)
     {
         $this->function = $function;
         $this->call = $call;
@@ -66,7 +66,7 @@ class Chain
      */
     public function prev()
     {
-        if(isset($this->prev)) {
+        if (isset($this->prev)) {
             return $this->prev;
         }
         return null;
@@ -92,7 +92,7 @@ class Chain
     public function rewind()
     {
         $item = $this;
-        while(isset($item->prev)){
+        while (isset($item->prev)) {
             $item = $item->prev;
         }
         return $item;
@@ -104,7 +104,7 @@ class Chain
     public function last()
     {
         $item = $this;
-        while(isset($item->next)){
+        while (isset($item->next)) {
             $item = $item->next;
         }
         return $item;
@@ -113,10 +113,11 @@ class Chain
     /**
      * @return int
      */
-    public function length() {
+    public function length()
+    {
         $length = 1;
         $item = $this->rewind();
-        while($item->next){
+        while ($item->next) {
             $item = $item->next;
             $length++;
         }
@@ -131,7 +132,7 @@ class Chain
         $item = $this;
         $root = new Chain($item->function, $item->call);
         $result = $root;
-        while (isset($item->next)){
+        while (isset($item->next)) {
             $item = $item->next;
             $new_node = new Chain($item->function, $item->call);
             $result->next = $new_node;
@@ -169,7 +170,7 @@ class Chain
      */
     public function delTail()
     {
-        if($this->next) {
+        if ($this->next) {
             unset($this->next->prev);
             unset($this->next);
             $this->call = null;
@@ -192,7 +193,8 @@ class Chain
      */
     public function __toString()
     {
-        return strval($this->function) . ($this->next ? $this->call->node->getStartLine() . " => ".strval($this->next) : "");
+        return strval($this->function) .
+            ($this->next ? $this->call->node->getStartLine() . " => " . strval($this->next) : "");
     }
 
     /**

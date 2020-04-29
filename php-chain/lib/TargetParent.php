@@ -1,9 +1,9 @@
 <?php
+
 /**
  */
 
 namespace PhpChain;
-
 
 class TargetParent
 {
@@ -13,7 +13,7 @@ class TargetParent
 
     private $dfg;
 
-    public function __construct($block, $dfg, $conditions=[])
+    public function __construct($block, $dfg, $conditions = [])
     {
         $this->block = $block;
         $this->dfg = $dfg;
@@ -22,15 +22,18 @@ class TargetParent
         }
     }
 
-    public function functionStartBlock() {
+    public function functionStartBlock()
+    {
         return sizeof($this->block->parents) == 0;
     }
 
-    public function getCondition() {
+    public function getCondition()
+    {
         return $this->block->children[sizeof($this->block->children) - 1];
     }
 
-    public function checkCondition($cond) {
+    public function checkCondition($cond)
+    {
         if ($cond->getType() == "Stmt_Jump") {
             $reachable = 1;
         } elseif ($cond->getType() == "Stmt_JumpIf") {
@@ -59,14 +62,15 @@ class TargetParent
         return $reachable;
     }
 
-    public function isReachable() {
+    public function isReachable()
+    {
         if ($this->functionStartBlock()) {
             $this->reachable = 1;
             return $this->reachable;
         }
         $max = 0;
         foreach ($this->block->parents as $block_parent) {
-            $parent = new TargetParent($block_parent, $this->dfg,$this->conditions);
+            $parent = new TargetParent($block_parent, $this->dfg, $this->conditions);
             $cond = $parent->getCondition();
             $reachable = $this->checkCondition($cond);
             $this->conditions = clone $cond;
@@ -81,13 +85,14 @@ class TargetParent
         return $max;
     }
 
-    public function ifConditionVisited($cond) {
+    public function ifConditionVisited($cond)
+    {
         foreach ($this->conditions as $condition) {
 //            if ($condition == $cond) {
 //                var_dump("[");
-                if ($cond->if == $condition->else or $cond->else == $condition->if) {
+            if ($cond->if == $condition->else or $cond->else == $condition->if) {
 //                    return true;
-                }
+            }
         }
         return false;
     }

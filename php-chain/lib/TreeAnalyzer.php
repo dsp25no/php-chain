@@ -1,4 +1,5 @@
 <?php
+
 /**
  */
 
@@ -7,6 +8,7 @@ namespace PhpChain;
 use PhpParser\ParserFactory;
 use PhpParser\BuilderFactory as AstBuilder;
 use PHPCfg;
+
 use function PHPSTORM_META\type;
 
 class TreeAnalyzer
@@ -29,7 +31,7 @@ class TreeAnalyzer
     private function intraProceduralAnalyze()
     {
         $parser = new PHPCfg\Parser(
-            (new ParserFactory)->create(ParserFactory::PREFER_PHP7)
+            (new ParserFactory())->create(ParserFactory::PREFER_PHP7)
         );
         $factory = new AstBuilder();
 
@@ -72,16 +74,18 @@ class TreeAnalyzer
             foreach ($children as $call) {
                 $child = $children[$call];
                 $metric = $child->getMetric();
-                if ($metric[0] > $best_metric[0] or
+                if (
+                    $metric[0] > $best_metric[0] or
                     $metric[0] === $best_metric[0] and
-                    $metric[1] > $best_metric[1]) {
+                    $metric[1] > $best_metric[1]
+                ) {
                     $best_metric = $metric;
                     $best_child = $child;
                 }
             }
 
             $params = $best_child->getDfg()->getOutputParams();
-            if(!$chain_call instanceof \StdClass) {
+            if (!$chain_call instanceof \StdClass) {
                 $dfg = $chain_node->getDfg();
                 $dfg->matchOutputInput($params);
                 $metric = $dfg->updateMetric();
@@ -94,9 +98,9 @@ class TreeAnalyzer
 
     public function analyze()
     {
-        echo "IntraProcedural Analyze".PHP_EOL;
+        echo "IntraProcedural Analyze" . PHP_EOL;
         $this->intraProceduralAnalyze();
-        echo "InterProcedural Analyze".PHP_EOL;
+        echo "InterProcedural Analyze" . PHP_EOL;
         $this->interProceduralAnalyze();
     }
 }

@@ -1,9 +1,9 @@
 <?php
+
 /**
  */
 
 namespace PhpChain;
-
 
 class TargetOp
 {
@@ -52,57 +52,54 @@ class TargetOp
         foreach ($this->op->vars as $var) {
             $target_var = $this->dfg->getTargetVar($var);
             $category = $target_var->getCategory();
-            if($category == "TMP") {
+            if ($category == "TMP") {
                 continue;
             }
             $metric = TargetVar::getNumber($category);
-            if($metric > $this->metric) {
+            if ($metric > $this->metric) {
                 $this->metric = $metric;
                 $this->category = $category;
             }
         }
-        if($this->category === "TMP") {
+        if ($this->category === "TMP") {
             $this->metric = TargetVar::getNumber($this->category);
         }
     }
 
-    public function classify() {
+    public function classify()
+    {
         $type = $this->op->getType();
         if ($type == "Expr_PropertyFetch") {
             $in = $this->dfg->getTargetVar($this->op->var);
             $this->category = $in->getCategory();
             $this->result = $in->value;
-        }
-        elseif ($type == "Expr_Param") {
+        } elseif ($type == "Expr_Param") {
             $this->category = "FUNC_PARAM";
-        }
-        elseif ($type == "Expr_Assign") {
+        } elseif ($type == "Expr_Assign") {
             $assign_val = $this->dfg->getTargetVar($this->op->expr);
             $this->category = $assign_val->getCategory();
             $this->result = $assign_val->value;
-        }
-        elseif ($type == "Phi") {
+        } elseif ($type == "Phi") {
             $this->composePhiOp();
-        }
-        elseif (substr($type, 0, 13) == "Expr_BinaryOp") {
+        } elseif (substr($type, 0, 13) == "Expr_BinaryOp") {
             $this->composeBinaryOp();
             if ($this->category == "CONST") {
                 $this->result = TargetOp::countExpr($this->dfg->getTargetVar($this->op->result), $this->dfg);
             }
-        }
-        else {
+        } else {
             $this->category = "VAR";
         }
     }
 
-    public static function countExpr(TargetVar $expr, $dfg) {
+    public static function countExpr(TargetVar $expr, $dfg)
+    {
         $var_type = $expr->var->getType();
         if ($var_type == "Literal") {
             return $expr->var->value;
         }
         foreach ($expr->var->ops as $op) {
             $type = $op->getType();
-            if(substr($type, 0, 13) == "Expr_BinaryOp") {
+            if (substr($type, 0, 13) == "Expr_BinaryOp") {
                 if ($type == "Expr_BinaryOp_Plus") {
                     return TargetOp::countExpr($dfg->getTargetVar($op->left, $dfg), $dfg) +
                         TargetOp::countExpr($dfg->getTargetVar($op->left, $dfg), $dfg);
@@ -124,7 +121,7 @@ class TargetOp
         return $expr->value;
     }
 
-    public function updateCategory($category=null)
+    public function updateCategory($category = null)
     {
         $type = $this->op->getType();
         if ($type == "Expr_Param") {
@@ -160,5 +157,4 @@ class TargetOp
         }
         return $this->metric;
     }
-
 }

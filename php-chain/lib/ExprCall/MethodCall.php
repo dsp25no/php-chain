@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -31,12 +32,12 @@ class MethodCall extends ExprCall
      * @param ClassMethod|null $func
      * @throws \Exception
      */
-    public function __construct($node, ClassMethod $func=null)
+    public function __construct($node, ClassMethod $func = null)
     {
-        if($node instanceof ParserMethodCall) {
+        if ($node instanceof ParserMethodCall) {
             $this->name = $node->name;
             if ($node->var->name == "this") {
-                if(!$func) {
+                if (!$func) {
                     throw new \Exception("Method without owner");
                 }
                 $this->owner = $func->class->name;
@@ -45,8 +46,10 @@ class MethodCall extends ExprCall
             }
         } elseif ($node instanceof ParserNew) {
             $this->name = "__construct";
-            if($node->class instanceof Node\Identifier or
-                $node->class instanceof Node\Name) {
+            if (
+                $node->class instanceof Node\Identifier or
+                $node->class instanceof Node\Name
+            ) {
                 $this->owner = $node->class;
             } else {
                 $this->owner = "*";
@@ -80,19 +83,20 @@ class MethodCall extends ExprCall
      */
     public function getMethodName()
     {
-        return $this->owner."->".$this->name;
+        return $this->owner . "->" . $this->name;
     }
 
     /**
      * @return string
      */
-    public function getRegex() {
+    public function getRegex()
+    {
         $regex = "/^";
         $regex .= $this->owner === "*" ?
                    "[\w\\\\]+" :
                    preg_quote($this->owner);
         $regex .= "->";
-        if($this->name instanceof Node\Expr\Variable) {
+        if ($this->name instanceof Node\Expr\Variable) {
             $regex .= "[\w]+";
         } else {
             $regex .= $this->name;

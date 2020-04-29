@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -19,7 +20,7 @@ class ArrayAccessResolver extends NodeVisitorAbstract
     {
         if ($node instanceof ParserArrayDimFetch) {
             $attributes = $node->getAttributes();
-            if($node->dim) {
+            if ($node->dim) {
                 $param = new ParserArg($node->dim);
                 $param->setAttributes($attributes);
                 $params = [$param];

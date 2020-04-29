@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -14,7 +15,8 @@ use PhpChain\ExprCall\FuncCall;
  * Class ProjectKnowledge
  * @package PhpChain
  */
-class ProjectKnowledge {
+class ProjectKnowledge
+{
     /**
      * @var ClassLike[]
      */
@@ -30,7 +32,7 @@ class ProjectKnowledge {
     /**
      * @var ClassMethod[]
      */
-    private array $__call_methods;
+    private array $call_methods;
 
     /**
      * ProjectKnowledge constructor.
@@ -71,7 +73,8 @@ class ProjectKnowledge {
      * @param string $name
      * @return ClassLike
      */
-    public function getClass(string $name) {
+    public function getClass(string $name)
+    {
         return $this->classes[$name];
     }
 
@@ -79,7 +82,8 @@ class ProjectKnowledge {
      * @param string $name
      * @return Function_
      */
-    public function getFunction(string $name) {
+    public function getFunction(string $name)
+    {
         return $this->functions[$name];
     }
 
@@ -87,32 +91,36 @@ class ProjectKnowledge {
      * @param string $name
      * @return ClassMethod
      */
-    public function getMethod(string $name) {
+    public function getMethod(string $name)
+    {
         return $this->methods[$name];
     }
 
     /**
      * @param ClassLike $class
      */
-    public function addClass(ClassLike $class) {
+    public function addClass(ClassLike $class)
+    {
         $this->classes[strval($class->name)] = $class;
     }
 
     /**
      * @param Function_ $function
      */
-    public function addFunction(Function_ $function) {
+    public function addFunction(Function_ $function)
+    {
         $this->functions[$function->getFullName()] = $function;
     }
 
     /**
      * @param ClassMethod $method
      */
-    public function addMethod(ClassMethod $method) {
+    public function addMethod(ClassMethod $method)
+    {
         $fullName = $method->getFullName();
         $this->methods[$fullName] = $method;
-        if($method->name == "__call") {
-            $this->__call_methods[] = $method;
+        if ($method->name == "__call") {
+            $this->call_methods[] = $method;
         }
     }
 
@@ -121,7 +129,7 @@ class ProjectKnowledge {
      * @param bool $strict
      * @return \Iterator|array
      */
-    public function getFunctionLikeByCall(ExprCall $call, $strict=true)
+    public function getFunctionLikeByCall(ExprCall $call, $strict = true)
     {
         if ($call instanceof FuncCall) {
             $regex = $call->getRegex();
@@ -151,9 +159,9 @@ class ProjectKnowledge {
         $regex = $call->getRegex();
         $iterator = new \AppendIterator();
         $iterator->append(new \RegexIterator(new \ArrayIterator($searchSet), $regex));
-        if(!$classFixed && !$strict) {
-            $iterator->append(new \ArrayIterator($this->__call_methods));
-        } elseif(!$strict) {
+        if (!$classFixed && !$strict) {
+            $iterator->append(new \ArrayIterator($this->call_methods));
+        } elseif (!$strict) {
             $iterator->append(new \ArrayIterator(["__call" => $searchSet["__call"]]));
         }
         return $iterator;

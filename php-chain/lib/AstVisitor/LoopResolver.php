@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -60,13 +61,14 @@ class LoopResolver extends NodeVisitorAbstract
                                 $it,
                                 "current",
                                 [],
-                                $attributes),
+                                $attributes
+                            ),
                             $attributes
                         ),
                     ]
                 ]
             );
-            if($k) {
+            if ($k) {
                 $if->stmts[] = new ParserAssign(
                     $k,
                     new ParserMethodCall($it, "key", [], $attributes),

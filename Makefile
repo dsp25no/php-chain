@@ -12,3 +12,7 @@ dev_build:
 .PHONY: build
 build:
 	docker build -t php-chain php-chain
+
+.PHONY: lint
+lint: dev_build
+	docker run php-chain_dev phpcs

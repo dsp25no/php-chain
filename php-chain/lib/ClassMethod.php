@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: dsp25no
@@ -34,8 +35,14 @@ class ClassMethod extends FunctionLike
      * @param ClassLike $class
      * @param array $attributes
      */
-    public function __construct($name, ParserClassMethod $node, $params, $flags, ClassLike $class, array $attributes = [])
-    {
+    public function __construct(
+        $name,
+        ParserClassMethod $node,
+        $params,
+        $flags,
+        ClassLike $class,
+        array $attributes = []
+    ) {
         parent::__construct($name, $node, $params, $attributes);
         $this->class = $class;
         $this->flags = $flags;
@@ -72,12 +79,12 @@ class ClassMethod extends FunctionLike
      */
     public function __toString()
     {
-        if(isset($this->_string)) {
-            return $this->_string;
+        if (isset($this->string)) {
+            return $this->string;
         }
         $function = parent::__toString();
-        $this->_string = $this->class->name->toCodeString() . "->" . $function;
+        $this->string = $this->class->name->toCodeString() . "->" . $function;
 
-        return $this->_string;
+        return $this->string;
     }
 }
