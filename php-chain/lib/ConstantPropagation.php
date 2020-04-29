@@ -119,6 +119,7 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
                 foreach ($op->list as $item) {
                     $op->result->{'value'} .= $item->value;
                 }
+                break;
             case $op instanceof Op\Expr\ConstFetch:
                 // NS ignored!!
                 $op->result->{'value'} = $op->name->value;
@@ -145,11 +146,13 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
                 break;
             case $op instanceof Op\Expr\Print_:
                 $op->result->{'value'} = 1;
+                break;
             case $op instanceof Op\Expr\UnaryMinus:
                 $op->result->{'value'} = -$op->expr->value;
+                break;
             case $op instanceof Op\Expr\UnaryPlus:
                 $op->result->{'value'} = +$op->expr->value;
-
+                break;
             case $op instanceof Op\Phi:
                 // Remove here PHI if no condition detected
                 if (count($op->vars) == 1) {
