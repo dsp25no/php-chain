@@ -12,6 +12,7 @@ namespace PhpChain;
 use PhpParser\Node\Name;
 use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\Stmt\Class_ as ParserClass;
+use PhpParser\Node\Stmt\ClassLike as ParserClassLike;
 
 /**
  * Class Class_
@@ -56,12 +57,15 @@ class Class_ extends ClassLike
     }
 
     /**
-     * @param ParserClass $node
+     * @param ParserClassLike $node
      * @param ProjectKnowledge $knowledge
      * @return mixed|Class_
      */
-    public static function create(ParserClass $node, ProjectKnowledge $knowledge)
+    public static function create(ParserClassLike $node, ProjectKnowledge $knowledge)
     {
+        if (! $node instanceof ParserClass) {
+            return parent::create($node, $knowledge);
+        }
         return new self($node->namespacedName, $node, $knowledge, $node->extends, $node->implements);
     }
 

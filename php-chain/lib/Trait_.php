@@ -9,6 +9,7 @@
 
 namespace PhpChain;
 
+use PhpParser\Node\Stmt\ClassLike as ParserClassLike;
 use PhpParser\Node\Stmt\Trait_ as ParserTrait;
 
 /**
@@ -19,12 +20,15 @@ use PhpParser\Node\Stmt\Trait_ as ParserTrait;
 class Trait_ extends ClassLike
 {
     /**
-     * @param ParserTrait $node
+     * @param ParserClassLike $node
      * @param ProjectKnowledge $knowledge
      * @return Trait_
      */
-    public static function create(ParserTrait $node, ProjectKnowledge $knowledge)
+    public static function create(ParserClassLike $node, ProjectKnowledge $knowledge)
     {
+        if (! $node instanceof ParserTrait) {
+            return parent::create($node, $knowledge);
+        }
         return new self($node->namespacedName, $node, $knowledge);
     }
 }

@@ -10,6 +10,8 @@
 namespace PhpChain;
 
 use PhpParser\Node\Name;
+use PhpParser\Node\Stmt\Class_ as ParserClass;
+use PhpParser\Node\Stmt\ClassLike as ParserClassLike;
 use PhpParser\Node\Stmt\Interface_ as ParserInterface;
 
 /**
@@ -44,12 +46,15 @@ class Interface_ extends ClassLike
     }
 
     /**
-     * @param ParserInterface $node
+     * @param ParserClassLike $node
      * @param ProjectKnowledge $knowledge
      * @return Interface_
      */
-    public static function create(ParserInterface $node, $knowledge)
+    public static function create(ParserClassLike $node, ProjectKnowledge $knowledge)
     {
+        if (! $node instanceof ParserInterface) {
+            return parent::create($node, $knowledge);
+        }
         return new self($node->namespacedName, $node, $knowledge, $node->extends);
     }
 
