@@ -9,7 +9,7 @@ class TargetVar
 {
     public $var;
     public $value;
-    public $usedIn;
+    public $penalties = [];
     private $category;
     private $metric;
     private $dfg;

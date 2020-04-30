@@ -7,9 +7,7 @@ namespace PhpChain;
 use PHPCfg;
 
 class Dfg {
-    const TARGET_CALL = 1;
-    const CONDITION = 2;
-    const TARGET_COND = 3;
+    const CONDITION = -1;
 
     private $script;
     private $call;
@@ -65,22 +63,27 @@ class Dfg {
         return $this->call;
     }
 
-    static public function addUsedIn($target, $usage)
+    public function addUsedIn($target, $usage)
     {
         if (! $target instanceof TargetVar and ! $target instanceof TargetOp) {
             throw new \Exception("Usage can be added only to Target Var or Op");
         }
-//        if (! in_array($usage, [Dfg::TARGET_CALL, Dfg::CONDITION, Dfg::TARGET_COND])) {
-//            throw new \Warn("Incorrect usage of TargetVar");
-//        }
-        if (!$target->usedIn or $usage == Dfg::TARGET_COND) {
-            $target->usedIn = $usage;
-        } elseif (
-            $target->usedIn == Dfg::CONDITION and $usage == Dfg::TARGET_CALL or
-            $target->usedIn == Dfg::TARGET_CALL and $usage == Dfg::CONDITION
-        ) {
-            $target->usedIn = Dfg::TARGET_COND;
+        if ( is_array($usage) ) {
+            foreach ($usage as $key => $item) {
+                $this->addUsedIn($target, $key);
+            }
+            return;
         }
+        if ( !$usage == Dfg::CONDITION and ($usage < 0 or $usage >= count($this->getCall()->getTargetArgs()))) {
+            throw new \Exception("Incorrect usage of TargetVar");
+        }
+        if ($usage === null) {
+            echo 1;
+        }
+        if ($target->penalties[$usage]) {
+            return;
+        }
+        $target->penalties[$usage] = 1.0;
     }
 
     private function buildSlice()

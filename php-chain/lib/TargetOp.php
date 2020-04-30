@@ -11,7 +11,7 @@ class TargetOp
     public $category;
     public $result;
     public $metric;
-    public $usedIn;
+    public $penalties = [];
 
     private $dfg;
 
