@@ -7,14 +7,15 @@ namespace PhpChain;
 use PhpParser\ParserFactory;
 use PhpParser\BuilderFactory as AstBuilder;
 use PHPCfg;
-use function PHPSTORM_META\type;
 
 class TreeAnalyzer
 {
     private $chainTree;
+    private $target_functions;
 
-    public function __construct($chainTree)
+    public function __construct($chainTree, $config)
     {
+        $this->target_functions = $config['system'];
         $this->chainTree = $chainTree;
         $criticalNodes = $this->chainTree->getChildren();
         foreach ($criticalNodes as $key) {
@@ -32,10 +33,15 @@ class TreeAnalyzer
             (new ParserFactory)->create(ParserFactory::PREFER_PHP7)
         );
         $factory = new AstBuilder();
+        $target_function = [];
 
         foreach ($this->chainTree->walk() as list($call, $chain_node)) {
             if ($call instanceof \StdClass) {
                 continue;
+            }
+            $parent = $chain_node->getParent()->value();
+            if (in_array($parent->name, $this->target_functions)) {
+                $target_function = $parent;
             }
             $function = $chain_node->value();
             $ast = $function->node;
@@ -47,10 +53,13 @@ class TreeAnalyzer
 
             $script = $parser->parseAst(array($ast), "stub_name");
             $dfg = new Dfg($script, $call);
+            $dfg->setLastCall($target_function);
+            $func_params = [];
+            if ($chain_node->getParent()->getDfg()) {
+                $func_params = $chain_node->getParent()->getDfg()->getFuncParams();
+            }
+            $dfg->buildSlice($func_params);
 
-            $metric = $dfg->analyze();
-
-            $chain_node->setMetric($metric);
             $chain_node->setDfg($dfg);
             $important_params = $dfg->getImportantParamNums();
             foreach ($chain_node->getChildren() as $call) {
@@ -71,21 +80,21 @@ class TreeAnalyzer
             $best_metric = -1;
             foreach ($children as $call) {
                 $child = $children[$call];
-                $metric = $child->getMetric();
+                $metric = $child->getDfg()->analyze();
+                if ($child->getMetric()) {
+                    $metric *= $child->getMetric();
+                }
+                $child->setMetric($metric);
                 if ($metric > $best_metric) {
                     $best_metric = $metric;
                     $best_child = $child;
                 }
             }
-
+            $chain_node->setMetric($best_metric);
             $params = $best_child->getDfg()->getOutputParams();
             if(!$chain_call instanceof \StdClass) {
                 $dfg = $chain_node->getDfg();
                 $dfg->matchOutputInput($params);
-                $metric = $dfg->updateMetric();
-                $chain_node->setMetric($metric);
-            } else {
-                $chain_node->setMetric($best_child->getMetric());
             }
         }
     }

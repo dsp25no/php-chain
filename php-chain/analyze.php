@@ -25,7 +25,7 @@ fwrite($file, json_encode($chainTree, JSON_PRETTY_PRINT));
 fclose($file);
 if ($config["metrics"]) {
     echo "Count metrics".PHP_EOL;
-    $analyzer = new TreeAnalyzer($chainTree);
+    $analyzer = new TreeAnalyzer($chainTree, $config);
     $analyzer->analyze();
     $file = fopen("/res/metric_chains", "w");
     fwrite($file, json_encode($chainTree, JSON_PRETTY_PRINT));

@@ -3,17 +3,32 @@
 
 namespace PhpChain;
 
-use PHPCfg\{Op, Block, Operand, Operand\NullOperand, Visitor};
+use PHPCfg\{Op, Block, Operand, Operand\NullOperand};
 
+/**
+ * Class ConstantPropagation
+ * @package PhpChain
+ */
 class ConstantPropagation  extends \PHPCfg\AbstractVisitor
 {
+    /**
+     * @var
+     */
     private $dfg;
 
+    /**
+     * ConstantPropagation constructor.
+     * @param $dfg
+     */
     public function __construct($dfg)
     {
         $this->dfg = $dfg;
     }
 
+    /**
+     * @param Block $block
+     * @return array
+     */
     private function aliveParents(Block $block)
     {
         $alive_parents = [];
@@ -25,6 +40,10 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
         return $alive_parents;
     }
 
+    /**
+     * @param Block $block
+     * @param Block|null $prior
+     */
     public function enterBlock(Block $block, Block $prior = null)
     {
         // Do not count dead block
@@ -40,6 +59,9 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
         foreach ($block->phi as $phi_op) {
             for ($i = count($phi_op->vars)-1; $i >= 0; $i--) {
                 $phi_parent = $this->findParent($block, $phi_op->vars[$i]);
+                if (!$phi_parent) {
+                    $p = $this->findParent($block, $phi_op->vars[$i]);
+                }
                 if (!$phi_parent or $phi_parent->dead) {
                     array_splice($phi_op->vars, $i, 1);
                 }
@@ -53,9 +75,20 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
         }
     }
 
+    /**
+     * @param Op $op
+     * @param Block $block
+     * @throws \Exception
+     */
     public function enterOp(Op $op, Block $block)
     {
-        $target_op = $this->dfg->getTargetOp($op);
+        $target_op = $this->dfg->getTargetOp($op, true);
+        if (!$target_op) {
+            if (! $op === $block->children[count($block->children)-1]) {
+                throw new \Exception("It should be no non-target ops");
+            }
+            return;
+        }
         // Check that all vars are constant or already counted
         foreach ($target_op->getArguments() as $argument) {
             // Null is also a constant
@@ -110,7 +143,9 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
                 break;
             case $op instanceof Op\Expr\ClassConstFetch:
                 $const = $op->name->value;
-                $op->result->{'value'} = $op->class->$const;
+                if (isset($op->class->$const)) {
+                    $op->result->{'value'} = $op->class->$const;
+                }
                 break;
             case $op instanceof Op\Expr\Clone_:
                 $op->result->{'value'} = clone $op->expr->value;
@@ -206,6 +241,10 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
         }
     }
 
+    /**
+     * @param Op\Expr\BinaryOp $op
+     * @return bool|float|int|string
+     */
     private function binaryOpResolver(Op\Expr\BinaryOp $op)
     {
         $left = $op->left->value;
@@ -262,6 +301,10 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
         }
     }
 
+    /**
+     * @param Op\Expr\Cast $op
+     * @return array|bool|float|int|object|string|unset
+     */
     private function castResolver(Op\Expr\Cast $op)
     {
         $expr = $op->expr->value;
@@ -283,6 +326,10 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
         }
     }
 
+    /**
+     * @param Op $op
+     * @param Block $block
+     */
     public function leaveOp(Op $op, Block $block)
     {
         if ($op instanceof  Op\Phi) {
@@ -290,7 +337,16 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
         }
     }
 
-    private function findParent(Block $block, Operand $var) {
+    /**
+     * @param Block $block
+     * @param Operand $var
+     * @param array $seen_parents
+     * @return Block|void
+     */
+    private function findParent(Block $block, Operand $var, array $seen_parents=[]) {
+        if (in_array($block, $seen_parents, true)) {
+            return;
+        }
         foreach ($var->ops as $op) {
             foreach ($block->parents as $parent) {
                 foreach ($parent->children as $parent_op) {
@@ -298,17 +354,34 @@ class ConstantPropagation  extends \PHPCfg\AbstractVisitor
                         return $parent;
                     }
                 }
+                foreach ($parent->phi as $phi) {
+                    if ($op === $phi) {
+                        return $parent;
+                    }
+                }
+                $seen_parents []= $block;
+                if ($grand_parent = $this->findParent($parent, $var, $seen_parents)) {
+                    return $grand_parent;
+                }
             }
         }
     }
 
+    /**
+     * @param Block $block
+     * @param Block|null $prior
+     */
     public function leaveBlock(Block $block, Block $prior = null)
     {
         if ($block->dead) {
-            return Visitor::REMOVE_BLOCK;
+//            return Visitor::REMOVE_BLOCK;
         }
     }
 
+    /**
+     * @param Block $block
+     * @param Block|null $prior
+     */
     public function skipBlock(Block $block, Block $prior = null)
     {
     }

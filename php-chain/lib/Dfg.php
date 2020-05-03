@@ -3,8 +3,9 @@
  */
 
 namespace PhpChain;
-
 use PHPCfg;
+use PhpChain\ChainAnalyzer\{RulesMatrix, PenaltyMatrix};
+
 
 class Dfg {
     const CONDITION = -1;
@@ -13,9 +14,13 @@ class Dfg {
     private $call;
     private $output_params = [];
     private $input_params = [];
+    private $func_params = [];
 
     private $targetVars;
     private $targetOps;
+
+    private $metric;
+    private $last_call;
 
     public function __construct($script, $call)
     {
@@ -69,6 +74,9 @@ class Dfg {
             throw new \Exception("Usage can be added only to Target Var or Op");
         }
         if ( is_array($usage) ) {
+            if (empty($usage)) {
+                throw new \Exception("Usage should not be empty");
+            }
             foreach ($usage as $key => $item) {
                 $this->addUsedIn($target, $key);
             }
@@ -77,53 +85,37 @@ class Dfg {
         if ( !$usage == Dfg::CONDITION and ($usage < 0 or $usage >= count($this->getCall()->getTargetArgs()))) {
             throw new \Exception("Incorrect usage of TargetVar");
         }
-        if ($usage === null) {
-            echo 1;
-        }
-        if ($target->penalties[$usage]) {
+        if (isset($target->penalties[$usage])) {
             return;
         }
-        $target->penalties[$usage] = 1.0;
+        $target->penalties[$usage] = PenaltyMatrix::UNSET_PENALTY;
     }
 
-    private function buildSlice()
+    public function buildSlice(array $func_params)
     {
         $traverser = new BackwardSliceWalker();
-        $slicer = new BackwardSlice($this);
+        $slicer = new BackwardSlice($this, $func_params);
         $traverser->addVisitor($slicer);
         $traverser->traverse($this->script);
     }
 
-    private function resolveConstants()
+    public function analyze(array $func_params=[])
     {
-        $traverser = new PHPCfg\Traverser();
-        $resolver = new ConstantPropagation($this);
-        $traverser->addVisitor($resolver);
-        $traverser->traverse($this->script);
-    }
-
-    public function countMetric()
-    {
-        $metric = 1.0;
-        foreach ($this->output_params as $var) {
-            $number = $var->getMetric();
-            $metric *= $number;
+        try {
+            $traverser = new PHPCfg\Traverser();
+            $resolver = new ConstantPropagation($this);
+            $rules_matrix = new RulesMatrix();
+            $rules = $rules_matrix->setRules($this->last_call, $this);
+            $chain_analyzer = new ChainAnalyzer($this, $rules);
+            $traverser->addVisitor($resolver);
+            $traverser->addVisitor($chain_analyzer);
+            $traverser->traverse($this->script);
+            $this->metric = $chain_analyzer->getDfgScore();
+        } catch (\Exception $exception) {
+            echo "Error in Dfg metric count".PHP_EOL;
+            $this->metric = PenaltyMatrix::UNDEFINED_PENALTY;
         }
-        return $metric;
-    }
-
-    public function analyze()
-    {
-        $this->buildSlice();
-        $this->resolveConstants();
-        $metric = $this->countMetric();
-        return $metric;
-    }
-
-    public function updateMetric()
-    {
-        $metric = $this->countMetric();
-        return $metric;
+        return $this->metric;
     }
 
     public function getImportantParamNums()
@@ -152,7 +144,36 @@ class Dfg {
     public function matchOutputInput($prev_output)
     {
         foreach ($prev_output as $index=>$var) {
-            $this->input_params[$index]->updateCategory($var->getCategory());
+            $this->input_params[$index]->penalites = $var->penalties;
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastCall()
+    {
+        return $this->last_call;
+    }
+
+    /**
+     * @param mixed $last_call
+     */
+    public function setLastCall(Function_ $last_call): void
+    {
+        $this->last_call = $last_call;
+    }
+
+    public function setFuncParam(TargetOp $target_param, int $parameter_number): void
+    {
+        $this->func_params [$parameter_number]= $target_param;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFuncParams(): array
+    {
+        return $this->func_params;
     }
 }

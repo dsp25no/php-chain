@@ -4,7 +4,7 @@
 namespace PhpChain;
 
 use PHPCfg;
-use PHPCfg\{Block, Op};
+use PHPCfg\{Block, Func, Op};
 
 /**
  * Class BackwardSlice
@@ -16,6 +16,7 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
      * @var
      */
     private $dfg;
+    private $func_params;
     /**
      * @var
      */
@@ -28,10 +29,12 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
     /**
      * BackwardSlice constructor.
      * @param $dfg
+     * @param $func_params
      */
-    public function __construct($dfg)
+    public function __construct($dfg, $func_params)
     {
         $this->dfg = $dfg;
+        $this->func_params = $func_params;
     }
 
     /**
@@ -66,22 +69,26 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
         $call = $this->dfg->getCall();
         if($op->getLine() === $call->node->getLine() and
             ($op->getType() === "Expr_FuncCall" or $op->getType() === "Expr_MethodCall") and
-            isset($op->name->value) and $op->name->value == $call->name) {
+            isset($op->name->value) and $op->name->value == $call->name
+        ) {
 
             $this->op = $op;
             $this->block = $block;
-
             $important_params = $this->dfg->getCall()->getTargetArgs();
             if($op->args) {
                 // skip function that don't have arguments
                 for ($i = 0; $i < sizeof($op->args); $i++) {
                     if (in_array($i, $important_params)) {
                         // add vars and ops to scope
-                        $this->addToScope($op->args[$i], $i);
-                        $target_var = $this->dfg->getTargetVar($op->args[$i], true);
+                        if (isset($this->func_params[$i])) {
+                            $usage = $this->func_params[$i]->penalties;
+                        } else {
+                            $usage = $i;
+                        }
+                        $target_var = $this->dfg->getTargetVar($op->args[$i]);
+                        $this->addToScope($op->args[$i], $usage);
                         $this->dfg->setOutputParam($target_var, $i);
                         $target_var->setOut();
-                        $this->dfg->addUsedIn($target_var, $i);
                     }
                 }
             }
@@ -155,6 +162,10 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
      */
     public function leaveBlock(Block $block, Block $prior = null)
     {
+        //Todo: resolve dynamic fetch problem: $p->$y(1,2); In that case constant propagation should be earlier
+        if ($this->op and !$this->dfg->getTargetOp($this->op, true)) {
+            $this->dfg->getTargetOp($this->op);
+        }
         // add if-else condition or other parent last stmt
         foreach ($block->parents as $parent) {
             if ($parent->children) {
@@ -166,11 +177,21 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
 
         // add phi to scope
         foreach ($block->phi as $phi) {
-            foreach ($phi->result->usages as $phi_usage) {
-                if ($target_op = $this->dfg->getTargetOp($phi_usage, true)) {
-                    $target_phi = $this->dfg->getTargetOp($phi);
-                    $this->addToScope($target_phi->getArguments(), $target_op->penalties);
-                }
+            if ( $target_result = $this->dfg->getTargetVar($phi->result, true) ){
+                $target_phi = $this->dfg->getTargetOp($phi);
+                $this->addToScope($target_phi->getArguments(), $target_result->penalties);
+            }
+        }
+    }
+
+    public function leaveFunc(Func $func)
+    {
+        foreach ($func->params as $parameter_number => $param) {
+            if ($this->checkInScope($param)) {
+                $target_param = $this->dfg->getTargetOp($param, true);
+                $target_var = $this->dfg->getTargetVar($param->result);
+                $this->dfg->addUsedIn($target_var, $target_param->penalties);
+                $this->dfg->setFuncParam($target_param, $parameter_number);
             }
         }
     }
