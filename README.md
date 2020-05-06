@@ -6,9 +6,13 @@ This tool was written for search of chains in PHP projects within the [master's 
 
 To analyze php-project, run:
 
-    ./analyze.sh <target directory>
+    ./run.sh analyze <target directory>
 
 Results will be in the directory `res`.
+
+For more options, run:
+
+    ./run.sh help
 
 ## Quick developing start
 
