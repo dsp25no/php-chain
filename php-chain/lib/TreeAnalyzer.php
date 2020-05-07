@@ -11,11 +11,9 @@ use PHPCfg;
 class TreeAnalyzer
 {
     private $chainTree;
-    private $target_functions;
 
-    public function __construct($chainTree, $config)
+    public function __construct($chainTree)
     {
-        $this->target_functions = $config['system'];
         $this->chainTree = $chainTree;
         $criticalNodes = $this->chainTree->getChildren();
         foreach ($criticalNodes as $key) {
@@ -33,16 +31,17 @@ class TreeAnalyzer
             (new ParserFactory)->create(ParserFactory::PREFER_PHP7)
         );
         $factory = new AstBuilder();
-        $target_function = [];
+        $target_function = null;
 
         foreach ($this->chainTree->walk() as list($call, $chain_node)) {
             if ($call instanceof \StdClass) {
                 continue;
             }
             $parent = $chain_node->getParent()->value();
-            if (in_array($parent->name, $this->target_functions)) {
+            if (!$parent->extractCalls()) {
                 $target_function = $parent;
             }
+
             $function = $chain_node->value();
             $ast = $function->node;
             if ($function instanceof ClassMethod) {
