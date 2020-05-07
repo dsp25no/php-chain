@@ -4,7 +4,7 @@
 namespace PhpChain;
 
 use PHPCfg;
-use PHPCfg\{Block, Func, Op};
+use PHPCfg\{Block, Func, Op, Script};
 
 /**
  * Class BackwardSlice
@@ -162,10 +162,6 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
      */
     public function leaveBlock(Block $block, Block $prior = null)
     {
-        //Todo: resolve dynamic fetch problem: $p->$y(1,2); In that case constant propagation should be earlier
-        if ($this->op and !$this->dfg->getTargetOp($this->op, true)) {
-            $this->dfg->getTargetOp($this->op);
-        }
         // add if-else condition or other parent last stmt
         foreach ($block->parents as $parent) {
             if ($parent->children) {
@@ -193,6 +189,14 @@ class BackwardSlice extends \PHPCfg\AbstractVisitor
                 $this->dfg->addUsedIn($target_var, $target_param->penalties);
                 $this->dfg->setFuncParam($target_param, $parameter_number);
             }
+        }
+    }
+
+    public function leaveScript(Script $script)
+    {
+        //Todo: resolve dynamic fetch problem: $p->$y(1,2); In that case constant propagation should be earlier
+        if ($this->op) {
+            $this->dfg->getTargetOp($this->op);
         }
     }
 

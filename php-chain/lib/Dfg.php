@@ -4,11 +4,11 @@
 
 namespace PhpChain;
 use PHPCfg;
-use PhpChain\ChainAnalyzer\{RulesMatrix, PenaltyMatrix};
+use PhpChain\DfgAnalyzer\{RulesMatrix, PenaltyMatrix};
 
 
 class Dfg {
-    const CONDITION = -1;
+    public const CONDITION = -1;
 
     private $script;
     private $call;
@@ -106,7 +106,7 @@ class Dfg {
             $resolver = new ConstantPropagation($this);
             $rules_matrix = new RulesMatrix();
             $rules = $rules_matrix->setRules($this->last_call, $this);
-            $chain_analyzer = new ChainAnalyzer($this, $rules);
+            $chain_analyzer = new DfgAnalyzer($this, $rules);
             $traverser->addVisitor($resolver);
             $traverser->addVisitor($chain_analyzer);
             $traverser->traverse($this->script);

@@ -1,71 +1,71 @@
 <?php
 
 
-namespace PhpChain\ChainAnalyzer;
+namespace PhpChain\DfgAnalyzer;
 
 
 /**
  * Class PenaltyMatrix
- * @package PhpChain\ChainAnalyzer
+ * @package PhpChain\DfgAnalyzer
  */
 class PenaltyMatrix
 {
     /**
      *
      */
-    const PROPERTY = 0.99;
+    public const PROPERTY = 0.99;
     /**
      *
      */
-    const CONSTANT = 0.2;
+    public const CONSTANT = 0.2;
     /**
      *
      */
-    const CONSTANT_FOR_CONDITION = 0.9;
+    public const CONSTANT_FOR_CONDITION = 0.9;
     /**
      *
      */
-    const BASE_SANITIZER_PENALTY = 0.1;
+    public const BASE_SANITIZER_PENALTY = 0.1;
     /**
      *
      */
-    const PENALTY_FOR_OP = 0.99;
+    public const PENALTY_FOR_OP = 0.99;
     /**
      *
      */
-    const UNDER_CONDITION_BLOCK = 0.7;
+    public const UNDER_CONDITION_BLOCK = 0.92;
     /**
      *
      */
-    const FUNC_PARAM = 0.95;
+    public const FUNC_PARAM = 0.95;
     /**
      *
      */
-    const SPECIFIC_SANITIZER_PENALTY = 0.01;
+    public const SPECIFIC_SANITIZER_PENALTY = 0.01;
     /**
      *
      */
-    const CONDITION_LEVEL_THRESHOLD = 0.5;
+    public const CONDITION_LEVEL_THRESHOLD = 0.5;
     /**
      *
      */
-    const PROPERTY_LEVEL_THRESHOLD = 0.7;
+    public const PROPERTY_LEVEL_THRESHOLD = 0.7;
     /**
      *
      */
-    const UNSET_PENALTY = 1.0;
+    public const UNSET_PENALTY = 1.0;
     /**
      *
      */
-    const UNDEFINED_PENALTY = 0.5;
+    public const UNDEFINED_PENALTY = 0.5;
     /**
      *
      */
-    const TYPE_CHANGED = 0.1;
+    public const TYPE_CHANGED = 0.1;
     /**
      *
      */
-    const ARRAY_NAME_PENALTY = 0.8;
+    public const ARRAY_NAME_PENALTY = 0.8;
     /**
      *
      */
@@ -75,7 +75,7 @@ class PenaltyMatrix
      * securing functions for every vulnerability
      * Todo: add desanitizers. Aka decode, decrypt
      */
-    const BASE_SANITIZERS_LIST = array(
+    public const BASE_SANITIZERS_LIST = array(
 		'intval',
 		'floatval',
 		'doubleval',
@@ -148,7 +148,7 @@ class PenaltyMatrix
     /**
      *
      */
-    const HTML_SANITIZERS_LIST  = array(
+    public const HTML_SANITIZERS_LIST  = array(
         'htmlentities',
         'htmlspecialchars',
         'highlight_string',
@@ -157,7 +157,7 @@ class PenaltyMatrix
     /**
      * securing functions for SQLi
      */
-    const SQL_SANITIZERS_LIST = array(
+    public const SQL_SANITIZERS_LIST = array(
         'addslashes',
         'dbx_escape_string',
         'db2_escape_string',
@@ -178,14 +178,14 @@ class PenaltyMatrix
     /**
      * securing functions for RCE with e-modifier in preg_**
      */
-    const PREG_SANITIZERS_LIST = array(
+    public const PREG_SANITIZERS_LIST = array(
         'preg_quote'
     );
 
     /**
      * securing functions for file handling
      */
-    const FILE_SANITIZERS_LIST = array(
+    public const FILE_SANITIZERS_LIST = array(
         'basename',
         'dirname',
         'pathinfo'
@@ -194,7 +194,7 @@ class PenaltyMatrix
     /**
      * securing functions for OS command execution
      */
-    const RCE_SANITIZERS_LIST = array(
+    public const RCE_SANITIZERS_LIST = array(
         'escapeshellarg',
         'escapeshellcmd'
     );
@@ -202,7 +202,7 @@ class PenaltyMatrix
     /**
      * securing XPath injection
      */
-    const XPATH_SANITIZERS_LIST = array(
+    public const XPATH_SANITIZERS_LIST = array(
         'addslashes'
     );
 

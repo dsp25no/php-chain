@@ -28,6 +28,7 @@ class BackwardSliceWalker
         foreach ($script->functions as $func) {
             $this->traverseFunc($func, 'backward');
         }
+        $this->event('leaveScript', [$script]);
     }
 
     private function traverseFunc(Func $func, $direction)

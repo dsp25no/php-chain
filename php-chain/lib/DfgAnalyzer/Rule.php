@@ -1,13 +1,13 @@
 <?php
 
 
-namespace PhpChain\ChainAnalyzer;
+namespace PhpChain\DfgAnalyzer;
 
 use PHPCfg\Op;
 
 /**
  * Interface Rule
- * @package PhpChain\ChainAnalyzer
+ * @package PhpChain\DfgAnalyzer
  */
 interface Rule
 {
