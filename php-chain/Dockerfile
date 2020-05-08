@@ -6,8 +6,6 @@ WORKDIR /php-chain
 COPY composer.json .
 RUN composer install --no-dev
 
-COPY lib lib
-COPY analyze.php .
-COPY config.php .
+COPY . .
 
 ENTRYPOINT ["php",  "/php-chain/analyze.php"]
