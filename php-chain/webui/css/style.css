@@ -1,0 +1,92 @@
+.node {
+    cursor: pointer;
+}
+
+.node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 3px;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+}
+
+.node text {
+    font: 12px sans-serif;
+    pointer-events: none;
+    text-anchor: left;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    right: 0;
+    top: 0;
+    height: 100%; /* Full height */
+    animation-name: fadeIn;
+    animation-duration: 0.4s;
+}
+
+/* Modal Content */
+.modal-content {
+    position: fixed;
+    width: 600px;
+    border-left: 1px;
+    right: 0;
+    overflow: scroll;
+    height: 100%;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s;
+    -moz-box-shadow:    3px 3px 5px 6px #ccc;
+    -webkit-box-shadow: 3px 3px 5px 6px #ccc;
+    box-shadow:         3px 3px 5px 6px #ccc;
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 8px 10px;
+    background-color: steelblue;
+    height: 30px;
+    color: white;
+    font: 12px sans-serif;
+}
+
+.modal-body {
+    padding: 2px 8px;
+    overflow-y: scroll;
+    height: 90%;
+    font: 12px sans-serif;
+    background-color: white;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    background-color: steelblue;
+    color: white;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+}

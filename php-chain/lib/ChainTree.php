@@ -9,6 +9,8 @@
 namespace PhpChain;
 
 
+use PhpParser\Node;
+
 class ChainTree implements \JsonSerializable
 {
     private $children;
@@ -169,6 +171,11 @@ class ChainTree implements \JsonSerializable
         $json = [
             "function" => $this->function->getFullName()
         ];
+        if ($this->function->node and $this->parent->function->node) {
+            $json["startLine"] = $this->function->node->getAttribute('startLine');
+            $json["endLine"] = $this->function->node->getAttribute('endLine');
+            $json["filename"] = $this->function->node->getAttribute('filename');
+        }
         if($this->metric) {
             $json["metric"] = $this->metric;
         }

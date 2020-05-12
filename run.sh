@@ -32,6 +32,35 @@ function parse_chains_args() {
     done
 }
 
+function parse_manual_args() {
+    options=$(getopt -o c:p: -l chains:port: -- "$@")
+    eval set -- "$options"
+    while true; do
+        case "$1" in
+            -c|--chains)
+                chains=$(realpath $2)
+                EXTRA_DOCKER_OPTIONS+=("-v$chains:/chains")
+                shift 2
+            ;;
+            -p|--port)
+                port=$2
+                shift 2
+            ;;
+            --)
+                shift
+                break
+            ;;
+            *)
+                echo "Unsupport option" >&2
+                exit 1
+            ;;
+        esac
+    done
+
+    EXTRA_DOCKER_OPTIONS+=(-p "${port:-8080}":80)
+    parse_args "$@"
+}
+
 function check_image() {
     if ! docker inspect --type=image php-chain &> /dev/null
     then
@@ -52,10 +81,12 @@ Commands:
   build_chains         find potential chains in project
   count_metrics        analyze potential chains and score them
   help                 prints this message
+  manual_analyze       launch WEB interface, where you can manually
+                       analyze chains
 EOF
 }
 
-white_list=("analyze" "build_chains" "count_metrics" "help")
+white_list=("analyze" "build_chains" "count_metrics" "help" "manual_analyze")
 
 operation="$1"
 
@@ -93,11 +124,16 @@ case "$operation" in
         usage
         exit 0
     ;;
+    manual_analyze )
+        parse_manual_args "$@"
+        EXTRA_DOCKER_OPTIONS+=("--entrypoint" "php")
+        COMMAND+=(-S 0.0.0.0:80 -t webui)
+    ;;
 esac
 
 check_image
 
-echo "Starting analyze"
+echo "Starting..."
 exec docker run --rm \
      "${EXTRA_DOCKER_OPTIONS[@]}" \
      -v "$(pwd)/res":/res \

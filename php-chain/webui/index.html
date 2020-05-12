@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.2/styles/default.min.css"/>
+    <link rel="stylesheet" href="/css/style.css"/>
+    <title>PHP chain</title>
+</head>
+<body>
+<label for="fileInput" class="custom-file-upload">Choose file with chains</label>
+<input id="fileInput" type="file" name="file"/>
+<div id="tree-container"></div>
+<div id="search-modal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close" id="close-modal">&times;</span>
+            <h3>Function code</h3>
+        </div>
+        <div id="code" class="modal-body"></div>
+    </div>
+</div>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.2/highlight.min.js"></script>
+</body>
+</html>

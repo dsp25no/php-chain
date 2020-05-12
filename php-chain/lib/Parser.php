@@ -4,7 +4,7 @@ namespace PhpChain;
 
 use PhpParser\{ParserFactory,NodeTraverser};
 use PhpParser\NodeVisitor\NameResolver;
-use PhpChain\AstVisitor\{Collector, LoopResolver, ArrayAccessResolver};
+use PhpChain\AstVisitor\{Collector, FilenameSaver, LoopResolver, ArrayAccessResolver};
 
 
 class Parser
@@ -60,10 +60,12 @@ class Parser
 
             $code = file_get_contents($filename);
             try {
+                $filename_saver = new FilenameSaver($filename);
+                $this->traverser->addVisitor($filename_saver);
                 // parse
                 $stmts = $this->parser->parse($code);
-
                 $this->traverser->traverse($stmts);
+                $this->traverser->removeVisitor($filename_saver);
 
             } catch (\PhpParser\Error $e) {
                 echo "Fail to parse $filename: ", $e->getMessage().PHP_EOL;
